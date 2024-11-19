@@ -7,16 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import Navbar from "@/components/Navbar";
 import { Users, Coins, Timer } from "lucide-react";
-
-interface Bet {
-  id: string;
-  gameType: string;
-  wagerAmount: string;
-  poolLimit: string;
-  description: string;
-  banker: string;
-  remainingPool: string;
-}
+import type { Bet } from "@/types/bet";
+import { BetCard } from "@/components/BetCard";
+import { BetActions } from "@/components/BetActions";
 
 const mockBets: Bet[] = [
   {
@@ -26,7 +19,13 @@ const mockBets: Bet[] = [
     poolLimit: "5",
     description: "Champions League Final",
     banker: "0x1234...5678",
-    remainingPool: "2.5",
+    currentPool: "2.0",
+    remainingPool: "3.0",
+    players: [],
+    contributors: [
+      { address: "0x1234...5678", amount: "2.0" }
+    ],
+    status: "open"
   },
   {
     id: "2",
@@ -35,7 +34,13 @@ const mockBets: Bet[] = [
     poolLimit: "1",
     description: "Roll higher than 4",
     banker: "0x8765...4321",
+    currentPool: "0.3",
     remainingPool: "0.7",
+    players: [],
+    contributors: [
+      { address: "0x8765...4321", amount: "0.3" }
+    ],
+    status: "open"
   },
 ];
 
@@ -43,23 +48,6 @@ const AvailableBets = () => {
   const { toast } = useToast();
   const [filter, setFilter] = useState({ gameType: "all", minWager: "" });
   const [bets] = useState<Bet[]>(mockBets);
-
-  const handleJoinBet = async (betId: string) => {
-    try {
-      console.log("Joining bet:", betId);
-      toast({
-        title: "Joining Bet",
-        description: "Transaction initiated. Please confirm in your wallet.",
-      });
-    } catch (error) {
-      console.error("Error joining bet:", error);
-      toast({
-        title: "Error",
-        description: "Failed to join bet. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,34 +92,7 @@ const AvailableBets = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="h-full">
-                  <CardHeader>
-                    <h3 className="text-xl font-semibold">{bet.description}</h3>
-                    <p className="text-muted-foreground capitalize">{bet.gameType}</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Coins className="w-4 h-4 text-primary" />
-                      <span>Wager: {bet.wagerAmount} ETH</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-primary" />
-                      <span>Banker: {bet.banker}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Timer className="w-4 h-4 text-primary" />
-                      <span>Remaining Pool: {bet.remainingPool} ETH</span>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleJoinBet(bet.id)}
-                    >
-                      Join Bet
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <BetCard bet={bet} />
               </motion.div>
             ))}
           </div>
