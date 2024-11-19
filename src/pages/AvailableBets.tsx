@@ -41,13 +41,12 @@ const mockBets: Bet[] = [
 
 const AvailableBets = () => {
   const { toast } = useToast();
-  const [filter, setFilter] = useState({ gameType: "", minWager: "" });
+  const [filter, setFilter] = useState({ gameType: "all", minWager: "" });
   const [bets] = useState<Bet[]>(mockBets);
 
   const handleJoinBet = async (betId: string) => {
     try {
       console.log("Joining bet:", betId);
-      // Here you would typically interact with your smart contract
       toast({
         title: "Joining Bet",
         description: "Transaction initiated. Please confirm in your wallet.",
@@ -76,12 +75,13 @@ const AvailableBets = () => {
             <div className="flex gap-4">
               <Select
                 onValueChange={(value) => setFilter({ ...filter, gameType: value })}
+                defaultValue="all"
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Game Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="sports">Sports</SelectItem>
                   <SelectItem value="dice">Dice</SelectItem>
                   <SelectItem value="cards">Cards</SelectItem>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,7 +27,7 @@ const CreateBet = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gameType: "",
+      gameType: "sports",
       wagerAmount: "",
       poolLimit: "",
       description: "",
@@ -38,7 +38,6 @@ const CreateBet = () => {
     try {
       setIsSubmitting(true);
       console.log("Creating bet with values:", values);
-      // Here you would typically interact with your smart contract
       toast({
         title: "Bet Created Successfully",
         description: "Your bet has been published to the blockchain.",
