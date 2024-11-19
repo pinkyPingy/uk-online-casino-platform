@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Wallet2 } from "lucide-react";
+import { Wallet2, Menu, X } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Navbar = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -22,6 +23,35 @@ const Navbar = () => {
     }
   };
 
+  const NavLinks = () => (
+    <>
+      <Link
+        to="/"
+        className={`nav-link ${location.pathname === "/" ? "text-secondary" : ""}`}
+      >
+        Home
+      </Link>
+      <Link
+        to="/create"
+        className={`nav-link ${location.pathname === "/create" ? "text-secondary" : ""}`}
+      >
+        Create Bet
+      </Link>
+      <Link
+        to="/available"
+        className={`nav-link ${location.pathname === "/available" ? "text-secondary" : ""}`}
+      >
+        Available Bets
+      </Link>
+      <Link
+        to="/my-bets"
+        className={`nav-link ${location.pathname === "/my-bets" ? "text-secondary" : ""}`}
+      >
+        My Bets
+      </Link>
+    </>
+  );
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-morphism">
       <div className="container mx-auto px-6 py-4">
@@ -30,31 +60,25 @@ const Navbar = () => {
             BidKub
           </Link>
           
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
-              className={`nav-link ${location.pathname === "/" ? "text-secondary" : ""}`}
-            >
-              Home
-            </Link>
-            <Link
-              to="/create"
-              className={`nav-link ${location.pathname === "/create" ? "text-secondary" : ""}`}
-            >
-              Create Bet
-            </Link>
-            <Link
-              to="/available"
-              className={`nav-link ${location.pathname === "/available" ? "text-secondary" : ""}`}
-            >
-              Available Bets
-            </Link>
-            <Link
-              to="/my-bets"
-              className={`nav-link ${location.pathname === "/my-bets" ? "text-secondary" : ""}`}
-            >
-              My Bets
-            </Link>
+            <NavLinks />
+          </div>
+          
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="p-2">
+                  <Menu className="h-6 w-6" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[80%] sm:w-[385px]">
+                <div className="flex flex-col space-y-4 mt-8">
+                  <NavLinks />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
           
           <button
