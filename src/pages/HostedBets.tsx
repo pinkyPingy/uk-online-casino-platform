@@ -25,8 +25,30 @@ const HostedBets = () => {
             try {
                 const result = await smartContractService.getMyBettingPostsAsBanker(100, 0); // Fetch with pagination
                 console.log("fetchBankerBets: ", result.data)
-                setBankerBets(result.data);
-                setHaveMore(result.haveMorePageAvailable);
+                // Map the result data to PostView format
+                const mappedBets = result.data.map((bet: any) => {
+                    const betData = bet;  // Extract the inner Proxy(_Result) for each bet
+                    // console.log("BET_DATA: ", bet)
+                    return {
+                        id: betData[0].toString(), // Convert BigInt to string
+                        matchId: betData[1].toString(),
+                        homeHandicapScore: Number(betData[2]), // Convert to number if needed
+                        awayHandicapScore: Number(betData[3]),
+                        totalStake: Number(betData[4]), // Convert BigInt to number
+                        myStake: Number(betData[5]),
+                        totalBet: betData[6], // Assuming this is a custom object, handle accordingly
+                        myBet: betData[7], // Handle similarly to totalBet
+                        // playerRewardClaimed: betData[8],
+                        // bankerRewardClaimed: betData[9],
+                        isInitialized: betData[9],
+                        isFinished: betData[8],
+                        isAlreadyMadeABet: betData[10],
+                        // isClaimed: betData[13], // Assuming `isClaimed` is at index 13 in the data
+                    };
+                });
+                console.log("Mapped fetchBankerBets: ", mappedBets)
+                setBankerBets(mappedBets);
+                setHaveMore(result.haveMorePageAvailable); // Set pagination status
             } catch (error) {
                 console.error("Error fetching banker bets:", error);
                 toast({
@@ -40,7 +62,7 @@ const HostedBets = () => {
         };
 
         fetchBankerBets();
-    }, [isConnected, walletAddress, page, toast]);
+    }, [isConnected, walletAddress, page]);
 
     const handleClaimReward = async (postId: string) => {
         try {
@@ -128,86 +150,91 @@ const HostedBets = () => {
                             {/* Active Bets */}
                             <TabsContent value="active" className="mt-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {bankerBets.filter((bet) => bet.status === "active").map((bet) => (
-                                        <motion.div
-                                            key={bet.id}
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <Card>
-                                                <CardHeader className="flex flex-row items-center justify-between">
-                                                    <div>
-                                                        <h3 className="text-xl font-semibold">{bet.description}</h3>
-                                                        <p className="text-muted-foreground capitalize">{bet.gameType}</p>
-                                                    </div>
-                                                    {getStatusIcon(bet.status)}
-                                                </CardHeader>
-                                                <CardContent className="space-y-4">
-                                                    <div className="flex justify-between items-center">
-                                                        <span>Wager Amount:</span>
-                                                        <span>{bet.wagerAmount} ETH</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span>Status:</span>
-                                                        <span className={getStatusColor(bet.status)}>
-                                                            {bet.status.toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span>Date:</span>
-                                                        <span>{bet.timestamp}</span>
-                                                    </div>
-                                                    <Button
-                                                        className="w-full mt-4"
-                                                        onClick={() => handleClaimReward(bet.id)}
-                                                    >
-                                                        Claim Reward
-                                                    </Button>
-                                                </CardContent>
-                                            </Card>
-                                        </motion.div>
-                                    ))}
+                                    {bankerBets
+                                        .filter((bet) => bet.isFinished && !bet.isInitialized //&& !bet.isClaimed
+                                        ) // Adjust condition TODO
+                                        .map((bet) => (
+                                            <motion.div
+                                                key={bet.id}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <Card>
+                                                    <CardHeader className="flex flex-row items-center justify-between">
+                                                        <div>
+                                                            <h3 className="text-xl font-semibold">{bet.description}</h3>
+                                                            <p className="text-muted-foreground capitalize">{bet.gameType}</p>
+                                                        </div>
+                                                        {getStatusIcon(bet.status)} {/* Assuming getStatusIcon is implemented */}
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Wager Amount:</span>
+                                                            <span>{bet.totalStake} ETH</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Status:</span>
+                                                            <span className={getStatusColor(bet.status)}>
+                                                                {bet.status?.toUpperCase() || 'ACTIVE'}  {/*TODO*/}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Date:</span>
+                                                            <span>{bet.timestamp}</span>
+                                                        </div>
+                                                        <Button
+                                                            className="w-full mt-4"
+                                                            onClick={() => handleClaimReward(bet.id)} // Assuming handleClaimReward is implemented
+                                                        >
+                                                            Claim Reward
+                                                        </Button>
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+                                        ))}
                                 </div>
                             </TabsContent>
 
                             {/* Claimed Bets */}
                             <TabsContent value="claimed">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {bankerBets.filter((bet) => bet.status === "claimed").map((bet) => (
-                                        <motion.div
-                                            key={bet.id}
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <Card>
-                                                <CardHeader className="flex flex-row items-center justify-between">
-                                                    <div>
-                                                        <h3 className="text-xl font-semibold">{bet.description}</h3>
-                                                        <p className="text-muted-foreground capitalize">{bet.gameType}</p>
-                                                    </div>
-                                                    {getStatusIcon(bet.status)}
-                                                </CardHeader>
-                                                <CardContent className="space-y-4">
-                                                    <div className="flex justify-between items-center">
-                                                        <span>Wager Amount:</span>
-                                                        <span>{bet.wagerAmount} ETH</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span>Status:</span>
-                                                        <span className={getStatusColor(bet.status)}>
-                                                            {bet.status.toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span>Date:</span>
-                                                        <span>{bet.timestamp}</span>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </motion.div>
-                                    ))}
+                                    {bankerBets
+                                        .filter((bet) => bet.status === "claimed" && bet.isInitialized) // Adjust condition
+                                        .map((bet) => (
+                                            <motion.div
+                                                key={bet.id}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <Card>
+                                                    <CardHeader className="flex flex-row items-center justify-between">
+                                                        <div>
+                                                            <h3 className="text-xl font-semibold">{bet.description}</h3>
+                                                            <p className="text-muted-foreground capitalize">{bet.gameType}</p>
+                                                        </div>
+                                                        {getStatusIcon(bet.status)} {/* Assuming getStatusIcon is implemented */}
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Wager Amount:</span>
+                                                            <span>{bet.totalStake} ETH</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Status:</span>
+                                                            <span className={getStatusColor(bet.status)}>
+                                                                {bet.status.toUpperCase()}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Date:</span>
+                                                            <span>{bet.timestamp}</span>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+                                        ))}
                                 </div>
                             </TabsContent>
                         </Tabs>
