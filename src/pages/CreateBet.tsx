@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
@@ -11,32 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Navbar from "@/components/Navbar";
 import { smartContractService } from "@/services/smartContractService";
 
-const mockMatches = [
-  {
-    id: "1",
-    home: "Manchester United",
-    away: "Liverpool",
-    isActive: true
-  },
-  {
-    id: "2",
-    home: "Arsenal",
-    away: "Chelsea",
-    isActive: true
-  },
-  {
-    id: "3",
-    home: "Barcelona",
-    away: "Real Madrid",
-    isActive: true
-  }
-];
-
 const CreateBet = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
+  const [matches, setMatches] = useState<any[]>([]); // Store fetched matches
+  const [hasMore, setHasMore] = useState(false); // Handle pagination state
+  const [page, setPage] = useState(1); // Pagination page number
 
   const form = useForm({
     defaultValues: {
@@ -45,6 +27,21 @@ const CreateBet = () => {
       awayHandicap: "",
     },
   });
+
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        const result = await smartContractService.getActiveMatches(1000, 0);
+        console.log("Matches are: ", result.data)
+        setMatches(result.data);
+        setHasMore(result.haveMorePageAvailable);
+      } catch (error) {
+        console.error("Error fetching matches:", error);
+      }
+    };
+
+    fetchMatches();
+  }, []);
 
   const onSubmit = async (values) => {
     try {
@@ -108,7 +105,7 @@ const CreateBet = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {mockMatches.map(match => (
+                        {matches.map((match) => (
                           <SelectItem key={match.id} value={match.id}>
                             {match.home} vs {match.away}
                           </SelectItem>
@@ -117,6 +114,7 @@ const CreateBet = () => {
                     </Select>
                   </FormItem>
 
+                  {/* Form Fields for stake, home handicap, away handicap */}
                   <FormField
                     control={form.control}
                     name="stake"
@@ -166,6 +164,15 @@ const CreateBet = () => {
               </Form>
             </CardContent>
           </Card>
+
+          {/* Pagination Controls */}
+          {hasMore && (
+            <div className="mt-4 flex justify-center">
+              <Button onClick={() => setPage(page + 1)} disabled={isSubmitting} className="w-full">
+                {isSubmitting ? "Loading..." : "Next Page"}
+              </Button>
+            </div>
+          )}
         </motion.div>
       </main>
     </div>
@@ -173,3 +180,4 @@ const CreateBet = () => {
 };
 
 export default CreateBet;
+
