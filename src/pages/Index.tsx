@@ -7,7 +7,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="container mx-auto px-6 pt-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -21,8 +21,11 @@ const Index = () => {
             The next generation of decentralized betting on Base Layer 2.
             Create, join, and win with complete transparency.
           </p>
+          <h2 className="text-2xl font-bold mt-4">
+            Connect your MetaMask Wallet for more details.
+          </h2>
         </motion.div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           <StatCard
             title="Total Bets"
@@ -40,15 +43,7 @@ const Index = () => {
             icon={<Award className="w-6 h-6" />}
           />
         </div>
-        
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-secondary mb-8">
-            Featured Bets
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Featured bets will be mapped here */}
-          </div>
-        </section>
+
       </main>
     </div>
   );

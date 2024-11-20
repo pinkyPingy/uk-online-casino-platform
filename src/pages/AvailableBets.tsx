@@ -58,7 +58,7 @@ const AvailableBets = () => {
   const [selectedMatch, setSelectedMatch] = useState<string>("");
   const [bets] = useState(mockBets);
 
-  const filteredBets = selectedMatch 
+  const filteredBets = selectedMatch
     ? bets.filter(bet => bet.matchId === selectedMatch)
     : bets;
 
@@ -81,7 +81,7 @@ const AvailableBets = () => {
                 <SelectValue placeholder="Select a match" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Matches</SelectItem>
+                <SelectItem value="all">All Matches</SelectItem>
                 {mockMatches.map(match => (
                   <SelectItem key={match.id} value={match.id}>
                     {match.home} vs {match.away}

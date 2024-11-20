@@ -12,7 +12,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useAdmin(walletAddress);
-  
+
   const handleConnect = async () => {
     try {
       if (typeof window.ethereum !== "undefined") {
@@ -48,30 +48,33 @@ const Navbar = () => {
       >
         Home
       </Link>
-      <Link
-        to="/create"
-        className={`nav-link ${location.pathname === "/create" ? "text-secondary" : ""}`}
-      >
-        Create Bet
-      </Link>
-      <Link
-        to="/available"
-        className={`nav-link ${location.pathname === "/available" ? "text-secondary" : ""}`}
-      >
-        Available Bets
-      </Link>
-      <Link
-        to="/my-bets"
-        className={`nav-link ${location.pathname === "/my-bets" ? "text-secondary" : ""}`}
-      >
-        My Bets
-      </Link>
+      {isConnected && (
+        <>
+          <Link
+            to="/create"
+            className={`nav-link ${location.pathname === "/create" ? "text-secondary" : ""}`}
+          >
+            Create Bet
+          </Link>
+          <Link
+            to="/available"
+            className={`nav-link ${location.pathname === "/available" ? "text-secondary" : ""}`}
+          >
+            Available Bets
+          </Link>
+          <Link
+            to="/my-bets"
+            className={`nav-link ${location.pathname === "/my-bets" ? "text-secondary" : ""}`}
+          >
+            My Bets
+          </Link>
+        </>
+      )}
       {isAdmin && (
         <Link
           to="/create-match"
-          className={`nav-link flex items-center gap-2 bg-secondary/10 px-3 py-1 rounded-md ${
-            location.pathname === "/create-match" ? "text-secondary" : ""
-          }`}
+          className={`nav-link flex items-center gap-2 bg-secondary/10 px-3 py-1 rounded-md ${location.pathname === "/create-match" ? "text-secondary" : ""
+            }`}
         >
           <Shield className="w-4 h-4" />
           Create Match
@@ -87,11 +90,11 @@ const Navbar = () => {
           <Link to="/" className="text-2xl font-bold text-secondary">
             BidKub
           </Link>
-          
+
           <div className="hidden md:flex items-center space-x-8">
             <NavLinks />
           </div>
-          
+
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -106,10 +109,10 @@ const Navbar = () => {
               </SheetContent>
             </Sheet>
           </div>
-          
+
           <button
             onClick={handleConnect}
-            className="flex items-center space-x-2 btn-primary"
+            className={`flex items-center space-x-2 ${isConnected ? "btn-primary" : "btn-secondary"}`}
           >
             <Wallet2 className="w-5 h-5" />
             <span>{isConnected ? "Connected" : "Connect Wallet"}</span>
