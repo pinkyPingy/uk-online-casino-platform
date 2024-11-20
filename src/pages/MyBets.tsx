@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import { Trophy, Timer, AlertTriangle } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 import { smartContractService } from "@/services/smartContractService";
+import {transformPostView} from "@/lib/utils"
 
 const MyBets = () => {
   const { toast } = useToast();
@@ -21,8 +22,24 @@ const MyBets = () => {
 
       setIsLoading(true);
       try {
-        const fetchedBets = await smartContractService.getBets(walletAddress);
-        setBets(fetchedBets);
+        console.log(walletAddress);
+        const fetchedBets = await smartContractService.getPostsIBetIn(100, 0);
+        console.log(fetchedBets);
+        if (fetchedBets.success) {
+          const parsedBets = Array.from(fetchedBets.data).map((proxyItem) => {
+            const myBet = transformPostView(proxyItem)
+            myBet["wagerAmount"] = myBet["totalStake"] / Math.pow(10, 18)
+            myBet["status"] = "Finished"?"Not Finish":myBet["isFinised"]
+            myBet["myBetHome"] = Number(myBet["myBet"][0]) / Math.pow(10, 18)
+            myBet["myBetAway"] = Number(myBet["myBet"][1]) / Math.pow(10, 18)
+            return myBet
+          })
+          console.log(parsedBets)
+          setBets(parsedBets);
+        } else {
+          setBets([]);
+        }
+        
       } catch (error) {
         console.error("Error fetching bets:", error);
         toast({
@@ -88,7 +105,9 @@ const MyBets = () => {
         <Navbar />
         <main className="container mx-auto px-6 pt-24">
           <h1 className="text-3xl font-bold text-secondary">My Bets</h1>
-          <p className="mt-6 text-muted-foreground">Please connect your wallet to view your bets.</p>
+          <p className="mt-6 text-muted-foreground">
+            Please connect your wallet to view your bets.
+          </p>
         </main>
       </div>
     );
@@ -129,8 +148,12 @@ const MyBets = () => {
                       <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
                           <div>
-                            <h3 className="text-xl font-semibold">{bet.description}</h3>
-                            <p className="text-muted-foreground capitalize">{bet.gameType}</p>
+                            <h3 className="text-xl font-semibold">
+                              {bet.description}
+                            </h3>
+                            <p className="text-muted-foreground capitalize">
+                              {bet.gameType}
+                            </p>
                           </div>
                           {getStatusIcon(bet.status)}
                         </CardHeader>
@@ -140,14 +163,18 @@ const MyBets = () => {
                             <span>{bet.wagerAmount} ETH</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span>Status:</span>
-                            <span className={getStatusColor(bet.status)}>
-                              {bet.status.toUpperCase()}
-                            </span>
+                            <span>Home Amount:</span>
+                            <span>{bet.myBetHome} ETH</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span>Date:</span>
-                            <span>{bet.timestamp}</span>
+                            <span>Away Amount:</span>
+                            <span>{bet.myBetAway} ETH</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span>Status:</span>
+                            <span className={getStatusColor(bet.status)}>
+                              {bet.status?.toUpperCase()}
+                            </span>
                           </div>
                           {bet.status === "active" && (
                             <Button
@@ -166,87 +193,97 @@ const MyBets = () => {
 
               <TabsContent value="active">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {bets.filter((bet) => bet.status === "active").map((bet) => (
-                    <motion.div
-                      key={bet.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                          <div>
-                            <h3 className="text-xl font-semibold">{bet.description}</h3>
-                            <p className="text-muted-foreground capitalize">{bet.gameType}</p>
-                          </div>
-                          {getStatusIcon(bet.status)}
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <span>Wager Amount:</span>
-                            <span>{bet.wagerAmount} ETH</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span>Status:</span>
-                            <span className={getStatusColor(bet.status)}>
-                              {bet.status.toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span>Date:</span>
-                            <span>{bet.timestamp}</span>
-                          </div>
-                          {bet.status === "active" && (
-                            <Button
-                              className="w-full mt-4"
-                              onClick={() => handleContributeFunds(bet.id)}
-                            >
-                              Contribute Funds
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
+                  {bets
+                    .filter((bet) => bet.status === "active")
+                    .map((bet) => (
+                      <motion.div
+                        key={bet.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Card>
+                          <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                              <h3 className="text-xl font-semibold">
+                                {bet.description}
+                              </h3>
+                              <p className="text-muted-foreground capitalize">
+                                {bet.gameType}
+                              </p>
+                            </div>
+                            {getStatusIcon(bet.status)}
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <span>Wager Amount:</span>
+                              <span>{bet.wagerAmount} ETH</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>Status:</span>
+                              <span className={getStatusColor(bet.status)}>
+                                {bet.status?.toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>Date:</span>
+                              <span>{bet.timestamp}</span>
+                            </div>
+                            {bet.status === "active" && (
+                              <Button
+                                className="w-full mt-4"
+                                onClick={() => handleContributeFunds(bet.id)}
+                              >
+                                Contribute Funds
+                              </Button>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
                 </div>
               </TabsContent>
 
               <TabsContent value="resolved">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {bets.filter((bet) => bet.status === "won" || bet.status === "lost").map((bet) => (
-                    <motion.div
-                      key={bet.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                          <div>
-                            <h3 className="text-xl font-semibold">{bet.description}</h3>
-                            <p className="text-muted-foreground capitalize">{bet.gameType}</p>
-                          </div>
-                          {getStatusIcon(bet.status)}
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <span>Wager Amount:</span>
-                            <span>{bet.wagerAmount} ETH</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span>Status:</span>
-                            <span className={getStatusColor(bet.status)}>
-                              {bet.status.toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span>Date:</span>
-                            <span>{bet.timestamp}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
+                  {bets
+                    .filter(
+                      (bet) => bet.status === "won" || bet.status === "lost",
+                    )
+                    .map((bet) => (
+                      <motion.div
+                        key={bet.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Card>
+                          <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                              <h3 className="text-xl font-semibold">
+                                {bet.description}
+                              </h3>
+                              <p className="text-muted-foreground capitalize">
+                                {bet.gameType}
+                              </p>
+                            </div>
+                            {getStatusIcon(bet.status)}
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <span>Wager Amount:</span>
+                              <span>{bet.wagerAmount} ETH</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>Status:</span>
+                              <span className={getStatusColor(bet.status)}>
+                                {bet.status?.toUpperCase()}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
                 </div>
               </TabsContent>
             </Tabs>
