@@ -89,9 +89,9 @@ const AvailableBets = () => {
             parseFloat(processedData["totalStake"]) -
             Math.abs(
               parseFloat(processedData["homeBets"]) -
-                parseFloat(processedData["awayBets"]),
+              parseFloat(processedData["awayBets"]),
             ) /
-              1000000000;
+            1000000000;
           return processedData;
         });
         console.log(bets);
@@ -137,19 +137,19 @@ const AvailableBets = () => {
                 <SelectValue>
                   {selectedMatch
                     ? (() => {
-                        // Find the selected match using String conversion for BigInt comparison
-                        const selected = matches.find(
-                          (match) => String(match[0]) === selectedMatch, // Match ID is in the 0th index and BigInt
-                        );
-                        return selected
-                          ? `${selected[1]} vs ${selected[2]}`
-                          : "Select a match";
-                      })()
+                      // Find the selected match using String conversion for BigInt comparison
+                      const selected = matches.find(
+                        (match) => String(match[0]) === selectedMatch, // Match ID is in the 0th index and BigInt
+                      );
+                      return selected
+                        ? `${selected[1]} vs ${selected[2]}`
+                        : "Select a match";
+                    })()
                     : "Select a match"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Matches</SelectItem>
+                <SelectItem value="all" disabled>-- Select a match --</SelectItem>
                 {isLoadingMatches ? (
                   <SelectItem value="all" disabled>
                     Loading matches...
