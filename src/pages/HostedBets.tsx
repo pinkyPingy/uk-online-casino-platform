@@ -16,7 +16,7 @@ const HostedBets = () => {
     const { isConnected, walletAddress } = useWallet();
     const [bankerBets, setBankerBets] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(0);
     const [haveMore, setHaveMore] = useState(true);
 
     useEffect(() => {
