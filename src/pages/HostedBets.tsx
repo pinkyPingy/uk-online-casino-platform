@@ -49,7 +49,7 @@ const HostedBets = () => {
                 description: "Transaction initiated. Please confirm in your wallet.",
             });
             // Call the smart contract method for claiming reward
-            await smartContractService.bankerClaimReward(postId);
+            await smartContractService.bankerClaimReward(Number(postId));
             toast({
                 title: "Reward Claimed",
                 description: "Your reward has been successfully claimed.",
