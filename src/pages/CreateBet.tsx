@@ -5,35 +5,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/Navbar";
-
-// Mock football matches data
-const mockMatches = [
-  {
-    id: "1",
-    homeTeam: "Manchester United",
-    awayTeam: "Liverpool",
-    date: "2024-03-20",
-    competition: "Premier League"
-  },
-  {
-    id: "2",
-    homeTeam: "Barcelona",
-    awayTeam: "Real Madrid",
-    date: "2024-03-25",
-    competition: "La Liga"
-  },
-  {
-    id: "3",
-    homeTeam: "Bayern Munich",
-    awayTeam: "Borussia Dortmund",
-    date: "2024-03-30",
-    competition: "Bundesliga"
-  }
-];
+import { smartContractService } from "@/services/smartContractService";
 
 const CreateBet = () => {
   const { toast } = useToast();
@@ -43,32 +19,32 @@ const CreateBet = () => {
 
   const form = useForm({
     defaultValues: {
-      gameType: "sports",
-      wagerAmount: "",
-      poolLimit: "",
-      description: "",
-      homeTeamOdds: "",
-      awayTeamOdds: "",
+      stake: "",
+      homeHandicap: "",
+      awayHandicap: "",
     },
   });
-
-  const gameType = form.watch("gameType");
 
   const onSubmit = async (values) => {
     try {
       setIsSubmitting(true);
       console.log("Creating bet with values:", values);
 
-      if (gameType === "sports" && !selectedMatch) {
+      if (!selectedMatch) {
         toast({
           title: "Error",
-          description: "Please select a match for sports betting",
+          description: "Please select a match",
           variant: "destructive",
         });
         return;
       }
 
-      // Here you would typically send the data to your smart contract
+      await smartContractService.createBettingPost(
+        Number(selectedMatch),
+        Number(values.homeHandicap),
+        Number(values.awayHandicap)
+      );
+
       toast({
         title: "Bet Created Successfully",
         description: "Your bet has been published to the blockchain.",
@@ -86,10 +62,6 @@ const CreateBet = () => {
     }
   };
 
-  const selectedMatchDetails = selectedMatch 
-    ? mockMatches.find(match => match.id === selectedMatch)
-    : null;
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -106,89 +78,26 @@ const CreateBet = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="gameType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Game Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select game type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="sports">Sports</SelectItem>
-                            <SelectItem value="dice">Dice Roll</SelectItem>
-                            <SelectItem value="cards">Card Game</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {gameType === "sports" && (
-                    <>
-                      <FormItem>
-                        <FormLabel>Select Match</FormLabel>
-                        <Select onValueChange={setSelectedMatch}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a match" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {mockMatches.map((match) => (
-                              <SelectItem key={match.id} value={match.id}>
-                                {match.homeTeam} vs {match.awayTeam} - {match.competition}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-
-                      {selectedMatchDetails && (
-                        <>
-                          <FormField
-                            control={form.control}
-                            name="homeTeamOdds"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{selectedMatchDetails.homeTeam} Odds</FormLabel>
-                                <FormControl>
-                                  <Input type="number" step="0.01" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="awayTeamOdds"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{selectedMatchDetails.awayTeam} Odds</FormLabel>
-                                <FormControl>
-                                  <Input type="number" step="0.01" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </>
-                      )}
-                    </>
-                  )}
+                  <FormItem>
+                    <FormLabel>Select Match</FormLabel>
+                    <Select onValueChange={setSelectedMatch}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a match" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {/* Match list will be populated from API */}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
 
                   <FormField
                     control={form.control}
-                    name="wagerAmount"
+                    name="stake"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Wager Amount (ETH)</FormLabel>
+                        <FormLabel>Stake Amount (ETH)</FormLabel>
                         <FormControl>
                           <Input type="number" step="0.01" {...field} />
                         </FormControl>
@@ -199,12 +108,12 @@ const CreateBet = () => {
 
                   <FormField
                     control={form.control}
-                    name="poolLimit"
+                    name="homeHandicap"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Pool Limit (ETH, Optional)</FormLabel>
+                        <FormLabel>Home Team Handicap</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} />
+                          <Input type="number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -213,12 +122,12 @@ const CreateBet = () => {
 
                   <FormField
                     control={form.control}
-                    name="description"
+                    name="awayHandicap"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>Away Team Handicap</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input type="number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
