@@ -9,6 +9,8 @@ import { Trophy, Timer, AlertTriangle } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 import { smartContractService } from "@/services/smartContractService";
 
+import { transformPostView } from "@/lib/utils";
+
 const HostedBets = () => {
     const { toast } = useToast();
     const { isConnected, walletAddress } = useWallet();
@@ -27,24 +29,7 @@ const HostedBets = () => {
                 console.log("fetchBankerBets: ", result.data)
                 // Map the result data to PostView format
                 const mappedBets = result.data.map((bet: any) => {
-                    const betData = bet;  // Extract the inner Proxy(_Result) for each bet
-                    // console.log("BET_DATA: ", bet)
-                    return {
-                        id: betData[0].toString(), // Convert BigInt to string
-                        matchId: betData[1].toString(),
-                        homeHandicapScore: Number(betData[2]), // Convert to number if needed
-                        awayHandicapScore: Number(betData[3]),
-                        totalStake: Number(betData[4]), // Convert BigInt to number
-                        myStake: Number(betData[5]),
-                        totalBet: betData[6], // Assuming this is a custom object, handle accordingly
-                        myBet: betData[7], // Handle similarly to totalBet
-                        // playerRewardClaimed: betData[8],
-                        // bankerRewardClaimed: betData[9],
-                        isInitialized: betData[9],
-                        isFinished: betData[8],
-                        isAlreadyMadeABet: betData[10],
-                        // isClaimed: betData[13], // Assuming `isClaimed` is at index 13 in the data
-                    };
+                    return transformPostView(bet);
                 });
                 console.log("Mapped fetchBankerBets: ", mappedBets)
                 setBankerBets(mappedBets);
