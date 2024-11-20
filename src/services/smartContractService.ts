@@ -7,16 +7,19 @@ class SmartContractService {
 
   async getContractOwner(): Promise<string> {
     if (this.contractOwner) return this.contractOwner;
-    
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = new ethers.Contract(
-        "YOUR_CONTRACT_ADDRESS",
-        ["function owner() view returns (address)"],
+        "0x8ffDd9d8ad3807Bf74119f6030e89064616869C3", // Contract address
+        [
+          "function getOwner() view returns (address)" // Correct ABI for the `getOwner` function
+        ],
         provider
       );
-      
-      this.contractOwner = await contract.owner();
+
+      // Call the correct contract method
+      this.contractOwner = await contract.getOwner(); // Ensure correct function call
       console.log("Contract owner fetched:", this.contractOwner);
       return this.contractOwner;
     } catch (error) {
@@ -165,7 +168,7 @@ class SmartContractService {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       this.contract = new ethers.Contract(
-        "YOUR_CONTRACT_ADDRESS",
+        "0x8ffDd9d8ad3807Bf74119f6030e89064616869C3",
         [
           "function owner() view returns (address)",
           "function createMatch(string memory home, string memory away) external",
