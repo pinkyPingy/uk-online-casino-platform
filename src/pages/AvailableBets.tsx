@@ -1,48 +1,66 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import BetCard from "@/components/BetCard";
 
-const mockBets = [
+const mockMatches = [
   {
     id: "1",
-    gameType: "sports",
-    wagerAmount: "0.5",
-    poolLimit: "5",
-    description: "Champions League Final",
-    banker: "0x1234...5678",
-    currentPool: "2.0",
-    remainingPool: "3.0",
-    players: [],
-    contributors: [
-      { address: "0x1234...5678", amount: "2.0", timestamp: Date.now() }
-    ],
-    status: "open",
+    home: "Manchester United",
+    away: "Liverpool",
+    isActive: true,
     createdAt: Date.now()
   },
   {
     id: "2",
-    gameType: "dice",
-    wagerAmount: "0.1",
-    poolLimit: "1",
-    description: "Roll higher than 4",
-    banker: "0x8765...4321",
-    currentPool: "0.3",
-    remainingPool: "0.7",
-    players: [],
-    contributors: [
-      { address: "0x8765...4321", amount: "0.3", timestamp: Date.now() }
-    ],
-    status: "open",
+    home: "Arsenal",
+    away: "Chelsea",
+    isActive: true,
+    createdAt: Date.now()
+  }
+];
+
+const mockBets = [
+  {
+    id: "1",
+    matchId: "1",
+    description: "Manchester United vs Liverpool",
+    creator: "0x1234...5678",
+    totalStake: "2.0",
+    homeHandicap: "+1.5",
+    awayHandicap: "-1.5",
+    homeBets: "1.2",
+    awayBets: "0.5",
+    maxBetAvailable: "0.3",
+    isResolved: true,
+    isClaimed: false,
     createdAt: Date.now()
   },
+  {
+    id: "2",
+    matchId: "2",
+    description: "Arsenal vs Chelsea",
+    creator: "0x8765...4321",
+    totalStake: "1.5",
+    homeHandicap: "0",
+    awayHandicap: "0",
+    homeBets: "0.7",
+    awayBets: "0.3",
+    maxBetAvailable: "0.5",
+    isResolved: true,
+    isClaimed: true,
+    createdAt: Date.now()
+  }
 ];
 
 const AvailableBets = () => {
-  const [filter, setFilter] = useState({ gameType: "all", minWager: "" });
+  const [selectedMatch, setSelectedMatch] = useState<string>("");
   const [bets] = useState(mockBets);
+
+  const filteredBets = selectedMatch 
+    ? bets.filter(bet => bet.matchId === selectedMatch)
+    : bets;
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,32 +73,26 @@ const AvailableBets = () => {
         >
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <h1 className="text-3xl font-bold text-secondary">Available Bets</h1>
-            <div className="flex gap-4">
-              <Select
-                onValueChange={(value) => setFilter({ ...filter, gameType: value })}
-                defaultValue="all"
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Game Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="sports">Sports</SelectItem>
-                  <SelectItem value="dice">Dice</SelectItem>
-                  <SelectItem value="cards">Cards</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                type="number"
-                placeholder="Min Wager"
-                className="w-[180px]"
-                onChange={(e) => setFilter({ ...filter, minWager: e.target.value })}
-              />
-            </div>
+            <Select
+              onValueChange={setSelectedMatch}
+              value={selectedMatch}
+            >
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder="Select a match" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Matches</SelectItem>
+                {mockMatches.map(match => (
+                  <SelectItem key={match.id} value={match.id}>
+                    {match.home} vs {match.away}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bets.map((bet) => (
+            {filteredBets.map((bet) => (
               <motion.div
                 key={bet.id}
                 initial={{ opacity: 0, scale: 0.95 }}

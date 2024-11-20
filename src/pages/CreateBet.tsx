@@ -11,6 +11,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Navbar from "@/components/Navbar";
 import { smartContractService } from "@/services/smartContractService";
 
+const mockMatches = [
+  {
+    id: "1",
+    home: "Manchester United",
+    away: "Liverpool",
+    isActive: true
+  },
+  {
+    id: "2",
+    home: "Arsenal",
+    away: "Chelsea",
+    isActive: true
+  },
+  {
+    id: "3",
+    home: "Barcelona",
+    away: "Real Madrid",
+    isActive: true
+  }
+];
+
 const CreateBet = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -87,7 +108,11 @@ const CreateBet = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {/* Match list will be populated from API */}
+                        {mockMatches.map(match => (
+                          <SelectItem key={match.id} value={match.id}>
+                            {match.home} vs {match.away}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -113,7 +138,7 @@ const CreateBet = () => {
                       <FormItem>
                         <FormLabel>Home Team Handicap</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} />
+                          <Input type="number" step="0.5" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -127,7 +152,7 @@ const CreateBet = () => {
                       <FormItem>
                         <FormLabel>Away Team Handicap</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} />
+                          <Input type="number" step="0.5" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
