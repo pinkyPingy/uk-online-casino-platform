@@ -5,18 +5,24 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { smartContractService } from "@/services/smartContractService";
 
 export const BetActions = ({ bet }) => {
   const { toast } = useToast();
   const [contributionAmount, setContributionAmount] = useState("");
+  const [betAmount, setBetAmount] = useState(""); // Added for bet amount
   const [isContributing, setIsContributing] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
-  const [betSide, setBetSide] = useState("true");
+  const [betSide, setBetSide] = useState(bet.homeBets ? true : false);
 
   const handleContribution = async () => {
     try {
       setIsContributing(true);
       console.log("Contributing to bet:", bet.id, "Amount:", contributionAmount);
+      await smartContractService.contributeToBettingPost(
+        Number(bet.id),
+        String(contributionAmount)
+      )
       toast({
         title: "Contributing to Bet Pool",
         description: "Transaction initiated. Please confirm in your wallet.",
@@ -36,7 +42,12 @@ export const BetActions = ({ bet }) => {
   const handleBet = async () => {
     try {
       setIsBetting(true);
-      console.log("Making bet:", bet.id, "Side:", betSide);
+      console.log("Making bet:", bet.id, "Side:", betSide, "Amount:", betAmount);
+      await smartContractService.makeABet(
+        Number(bet.id),
+        betSide,
+        String(betAmount)
+      )
       toast({
         title: "Making Bet",
         description: "Transaction initiated. Please confirm in your wallet.",
@@ -72,8 +83,8 @@ export const BetActions = ({ bet }) => {
               value={contributionAmount}
               onChange={(e) => setContributionAmount(e.target.value)}
             />
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               onClick={handleContribution}
               disabled={isContributing}
             >
@@ -96,23 +107,36 @@ export const BetActions = ({ bet }) => {
               <Label>Choose your side</Label>
               <RadioGroup
                 defaultValue="true"
-                onValueChange={(value) => setBetSide(value)}
+                onValueChange={(value) => setBetSide(value == "home" ? true : false)}
                 className="flex flex-col space-y-2"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="true" id="true" />
-                  <Label htmlFor="true">True</Label>
+                  <RadioGroupItem value="home" id="true" />
+                  <Label htmlFor="true">Home Side</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="false" id="false" />
-                  <Label htmlFor="false">False</Label>
+                  <RadioGroupItem value="away" id="false" />
+                  <Label htmlFor="false">Away Side</Label>
                 </div>
               </RadioGroup>
             </div>
-            <Button 
-              className="w-full" 
+
+            {/* Input for bet amount */}
+            <div className="space-y-2">
+              <Label htmlFor="bet-amount">Bet Amount (ETH)</Label>
+              <Input
+                id="bet-amount"
+                type="number"
+                placeholder="Enter amount"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+              />
+            </div>
+
+            <Button
+              className="w-full"
               onClick={handleBet}
-              disabled={isBetting}
+              disabled={isBetting || !betAmount} // Disable if betting or no amount entered
             >
               {isBetting ? "Processing..." : "Confirm Bet"}
             </Button>
