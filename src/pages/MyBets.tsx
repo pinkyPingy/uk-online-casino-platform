@@ -23,15 +23,15 @@ const MyBets = () => {
       setIsLoading(true);
       try {
         console.log(walletAddress);
-        const fetchedBets = await smartContractService.getPostsIBetIn(100, 0);
+        const fetchedBets = await smartContractService.getPostsIBetIn(10, 0);
         console.log(fetchedBets);
         if (fetchedBets.success) {
           const parsedBets = Array.from(fetchedBets.data).map((proxyItem) => {
             const myBet = transformPostView(proxyItem)
             myBet["wagerAmount"] = myBet["totalStake"] / Math.pow(10, 18)
             myBet["status"] = myBet["isFinish"]?"Finished":"Not Finish"
-            myBet["myBetHome"] = Number(myBet["myBet"][0]) / Math.pow(10, 18)
-            myBet["myBetAway"] = Number(myBet["myBet"][1]) / Math.pow(10, 18)
+            myBet["myBetHome"] = Number(myBet["myBet"]["awayBet"]) / Math.pow(10, 18)
+            myBet["myBetAway"] = Number(myBet["myBet"]["homeBet"]) / Math.pow(10, 18)
             return myBet
           })
           console.log(parsedBets)
