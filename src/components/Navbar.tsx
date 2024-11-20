@@ -37,6 +37,12 @@ const Navbar = () => {
           >
             My Bets
           </Link>
+          <Link
+            to="/hosted-bets"
+            className={`nav-link ${location.pathname === "/hosted-bets" ? "text-secondary" : ""}`}
+          >
+            Hosted Bets
+          </Link>
         </>
       )}
       {isAdmin && (

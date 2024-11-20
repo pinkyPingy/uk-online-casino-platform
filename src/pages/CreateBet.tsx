@@ -73,7 +73,8 @@ const CreateBet = () => {
       await smartContractService.createBettingPost(
         Number(selectedMatch),
         Number(values.homeHandicap),
-        Number(values.awayHandicap)
+        Number(values.awayHandicap),
+        String(values.stake)
       );
 
       toast({

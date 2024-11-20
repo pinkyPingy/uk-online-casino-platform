@@ -8,6 +8,7 @@ import CreateBet from "./pages/CreateBet";
 import CreateMatch from "./pages/CreateMatch";
 import AvailableBets from "./pages/AvailableBets";
 import MyBets from "./pages/MyBets";
+import HostedBets from "./pages/HostedBets"
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/create-match" element={<CreateMatch />} />
           <Route path="/available" element={<AvailableBets />} />
           <Route path="/my-bets" element={<MyBets />} />
+          <Route path="/hosted-bets" element={<HostedBets />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

@@ -131,7 +131,7 @@ const AvailableBets = () => {
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Matches</SelectItem>
+                <SelectItem value="all" disabled>-- Select a match --</SelectItem>
                 {isLoadingMatches ? (
                   <SelectItem value="all" disabled>Loading matches...</SelectItem>
                 ) : (
