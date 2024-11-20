@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
-import { PaginatedResponse, Match, Post } from "@/types/betting";
-
+import { PaginatedResponse, Match, Post,  } from "@/types/betting";
 class SmartContractService {
   private contractOwner: string | null = null;
   private contract: ethers.Contract | null = null;
@@ -30,6 +29,7 @@ class SmartContractService {
           "function playerClaimBettingReward(uint256 postId) external returns (bool)",
           "function createBettingPost(uint256 matchId, uint32 homeHandicapScore, uint32 awayHandicapScore) external payable returns (uint256 newPostId)",
           "function contributeToBettingPost(uint256 postId) external payable returns (bool)",
+          "function bankerClaimReward(uint256 postId) external returns (bool)",
         ],
         signer
       );
@@ -89,10 +89,10 @@ class SmartContractService {
   }
 
   // Create a betting post
-  async createBettingPost(matchId: number, homeHandicap: number, awayHandicap: number): Promise<number> {
+  async createBettingPost(matchId: number, homeHandicap: number, awayHandicap: number, amount: string): Promise<number> {
     try {
       await this.initialize(); // Ensure contract is initialized
-      const tx = await this.contract?.createBettingPost(matchId, homeHandicap, awayHandicap);
+      const tx = await this.contract?.createBettingPost(matchId, homeHandicap, awayHandicap, {value: ethers.parseEther(amount)});
       const receipt = await tx.wait();
       console.log("Betting post created:", receipt);
       return receipt.status; // You can return any relevant value from receipt
@@ -258,6 +258,17 @@ class SmartContractService {
     }
   }
 
+  async bankerClaimReward(postId: number): Promise<boolean> {
+    try {
+      if (!this.contract) throw new Error("Contract not initialized");
+      const tx = await this.contract.bankerClaimReward(postId);
+      const receipt = await tx.wait();
+      return receipt.status === 1;
+    } catch (error) {
+      console.error("Error claiming banker reward:", error);
+      throw error;
+    }
+  }
 }
 
 export const smartContractService = new SmartContractService();
