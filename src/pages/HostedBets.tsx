@@ -23,7 +23,8 @@ const HostedBets = () => {
 
             setIsLoading(true);
             try {
-                const result = await smartContractService.getMyBettingPostsAsBanker(10, page); // Fetch with pagination
+                const result = await smartContractService.getMyBettingPostsAsBanker(100, 0); // Fetch with pagination
+                console.log("fetchBankerBets: ", result.data)
                 setBankerBets(result.data);
                 setHaveMore(result.haveMorePageAvailable);
             } catch (error) {
