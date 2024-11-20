@@ -12,16 +12,24 @@ class SmartContractService {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       this.contract = new ethers.Contract(
-        "0x8ffDd9d8ad3807Bf74119f6030e89064616869C3", // Contract address
+        "0x1c307257BFE924Afd9ebf442710832353070F26a", // Contract address
         [
           "function getOwner() view returns (address)",
           "function createMatch(string memory home, string memory away) external",
           "function placeBet(uint256 matchId) external payable",
           "function getMatches() external view returns (tuple(uint256 id, string home, string away, uint256 startTime, bool isActive)[])",
           "function getBetsByAddress(address better) external view returns (tuple(uint256 matchId, uint256 amount, uint256 timestamp)[])",
-          "function createBettingPost(uint256 matchId, uint256 homeHandicap, uint256 awayHandicap) external payable",
           "function claimBettingReward(uint256 postId) external",
-          "function makeABet(uint256 postId, bool isHomeBet) external payable"
+          "function makeABet(uint256 postId, bool isHomeBet) external payable",
+          "function getPostsIBetInWithPagination(uint256 nData, uint256 pageNumber) view returns (tuple(uint256,uint256,uint32,uint32,uint256,uint256,tuple(uint256,uint256,bool,bool),tuple(uint256,uint256,bool,bool),bool,bool,bool)[] memory posts, bool success, bool haveMorePageAvailable)",
+          "function getMyBettingPostsAsBankerWithPagination(uint256 nData, uint256 pageNumber) view returns (tuple(uint256,uint256,uint32,uint32,uint256,uint256,tuple(uint256,uint256,bool,bool),tuple(uint256,uint256,bool,bool),bool,bool,bool)[] memory posts, bool success, bool haveMorePageAvailable)",
+          "function getPostsByMatchIdSortByLatestWithPagination(uint256 matchId, uint256 nData, uint256 pageNumber) view returns (tuple(uint256,uint256,uint32,uint32,uint256,uint256,tuple(uint256,uint256,bool,bool),tuple(uint256,uint256,bool,bool),bool,bool,bool)[] memory posts, bool success, bool haveMorePageAvailable)",
+          "function getActiveMatchSortByLatestWithPagination(uint256 nData, uint256 pageNumber) view returns (tuple(uint256,string,string,uint32,uint32,bool,bool,uint256)[] memory activeMatches, bool success, bool haveMorePageAvailable)",
+          "function getStakeInPostByUserAddress(uint256 postId, address user) view returns (uint256)",
+          "function finishMatch(uint256 matchId, uint32 homeScore, uint32 awayScore) external returns (bool)",
+          "function playerClaimBettingReward(uint256 postId) external returns (bool)",
+          "function createBettingPost(uint256 matchId, uint32 homeHandicapScore, uint32 awayHandicapScore) external payable returns (uint256 newPostId)",
+          "function contributeToBettingPost(uint256 postId) external payable returns (bool)",
         ],
         signer
       );
@@ -52,7 +60,7 @@ class SmartContractService {
   async getActiveMatches(pageSize: number, pageNumber: number): Promise<PaginatedResponse<Match>> {
     try {
       await this.initialize(); // Ensure contract is initialized
-      const result = await this.contract?.getActiveMatchSortByLatest(pageSize, pageNumber);
+      const result = await this.contract?.getActiveMatchSortByLatestWithPagination(pageSize, pageNumber);
       return {
         data: result.activeMatches,
         success: result.success,
@@ -68,7 +76,7 @@ class SmartContractService {
   async getPostsByMatchId(matchId: number, pageSize: number, pageNumber: number): Promise<PaginatedResponse<Post>> {
     try {
       await this.initialize(); // Ensure contract is initialized
-      const result = await this.contract?.getPostsByMatchIdWithPagination(matchId, pageSize, pageNumber);
+      const result = await this.contract?.getPostsByMatchIdSortByLatestWithPagination(matchId, pageSize, pageNumber);
       return {
         data: result.posts,
         success: result.success,
@@ -98,7 +106,7 @@ class SmartContractService {
   async claimBettingReward(postId: number): Promise<boolean> {
     try {
       await this.initialize(); // Ensure contract is initialized
-      const tx = await this.contract?.claimBettingReward(postId);
+      const tx = await this.contract?.playerClaimBettingReward(postId);
       const receipt = await tx.wait();
       return receipt.status === 1; // Return success status
     } catch (error) {
@@ -182,6 +190,74 @@ class SmartContractService {
       throw error;
     }
   }
+
+  async contributeToBettingPost(postId: number, amount: string): Promise<boolean> {
+    try {
+      if (!this.contract) throw new Error("Contract not initialized");
+      const tx = await this.contract.contributeToBettingPost(postId, {
+        value: ethers.parseEther(amount)
+      });
+      const receipt = await tx.wait();
+      return receipt.status === 1;
+    } catch (error) {
+      console.error("Error contributing to betting post:", error);
+      throw error;
+    }
+  }
+
+  async getStakeInPost(postId: number, userAddress: string): Promise<string> {
+    try {
+      if (!this.contract) throw new Error("Contract not initialized");
+      const stake = await this.contract.getStakeInPostByUserAddress(postId, userAddress);
+      return ethers.formatEther(stake.toString());
+    } catch (error) {
+      console.error("Error getting stake:", error);
+      throw error;
+    }
+  }
+
+  async finishMatch(matchId: number, homeScore: number, awayScore: number): Promise<boolean> {
+    try {
+      if (!this.contract) throw new Error("Contract not initialized");
+      const tx = await this.contract.finishMatch(matchId, homeScore, awayScore);
+      const receipt = await tx.wait();
+      return receipt.status === 1;
+    } catch (error) {
+      console.error("Error finishing match:", error);
+      throw error;
+    }
+  }
+
+  async getMyBettingPostsAsBanker(pageSize: number, pageNumber: number): Promise<PaginatedResponse<Post>> {
+    try {
+      if (!this.contract) throw new Error("Contract not initialized");
+      const result = await this.contract.getMyBettingPostsAsBankerWithPagination(pageSize, pageNumber);
+      return {
+        data: result.posts,
+        success: result.success,
+        haveMorePageAvailable: result.haveMorePageAvailable
+      };
+    } catch (error) {
+      console.error("Error fetching betting posts as banker:", error);
+      throw error;
+    }
+  }
+
+  async getPostsIBetIn(pageSize: number, pageNumber: number): Promise<PaginatedResponse<Post>> {
+    try {
+      if (!this.contract) throw new Error("Contract not initialized");
+      const result = await this.contract.getPostsIBetInWithPagination(pageSize, pageNumber);
+      return {
+        data: result.posts,
+        success: result.success,
+        haveMorePageAvailable: result.haveMorePageAvailable
+      };
+    } catch (error) {
+      console.error("Error fetching posts I bet in:", error);
+      throw error;
+    }
+  }
+
 }
 
 export const smartContractService = new SmartContractService();
