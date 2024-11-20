@@ -80,18 +80,19 @@ const AvailableBets = () => {
 
         const bets = Array.from(parsedBets).map((bet) => {
           const processedData = {};
+          processedData["id"] = bet["0"]
           processedData["homeHandicap"] = parseInt(bet["2"]);
           processedData["awayHandicap"] = parseInt(bet["3"]);
-          processedData["totalStake"] = parseInt(bet["4"]) / 1000000000;
-          processedData["homeBets"] = parseInt(bet["6"]["0"]) / 1000000000;
-          processedData["awayBets"] = parseInt(bet["6"]["1"]) / 1000000000;
+          processedData["totalStake"] = parseInt(bet["4"]) / Math.pow(10, 18);
+          processedData["homeBets"] = parseInt(bet["6"]["0"]) / Math.pow(10, 18);
+          processedData["awayBets"] = parseInt(bet["6"]["1"]) / Math.pow(10, 18);
           processedData["maxBetAvailable"] =
             parseFloat(processedData["totalStake"]) -
             Math.abs(
               parseFloat(processedData["homeBets"]) -
               parseFloat(processedData["awayBets"]),
             ) /
-            1000000000;
+            Math.pow(10, 18);
           processedData["home"] = bet["13"];
           processedData["away"] = bet["14"];
           return processedData;

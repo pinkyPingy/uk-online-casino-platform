@@ -10,7 +10,7 @@ import { smartContractService } from "@/services/smartContractService";
 export const BetActions = ({ bet }) => {
   const { toast } = useToast();
   const [contributionAmount, setContributionAmount] = useState("");
-  const [betAmount, setBetAmount] = useState(""); // Added for bet amount
+  const [betAmount, setBetAmount] = useState(bet.homeBets || bet.awayBets); // Added for bet amount
   const [isContributing, setIsContributing] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
   const [betSide, setBetSide] = useState(bet.homeBets ? true : false);

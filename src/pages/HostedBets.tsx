@@ -28,9 +28,11 @@ const HostedBets = () => {
                 const result = await smartContractService.getMyBettingPostsAsBanker(100, 0); // Fetch with pagination
                 console.log("fetchBankerBets: ", result.data)
                 // Map the result data to PostView format
-                const mappedBets = result.data.map((bet: any) => {
-                    return transformPostView(bet);
-                });
+                const mappedBets = result.data
+                    .map((bet: any) => transformPostView(bet))
+                    .filter((bet: any, index: number, self: any[]) =>
+                        index === self.findIndex((b) => b.id === bet.id)
+                    );
                 console.log("Mapped fetchBankerBets: ", mappedBets)
                 setBankerBets(mappedBets);
                 setHaveMore(result.haveMorePageAvailable); // Set pagination status
@@ -146,7 +148,7 @@ const HostedBets = () => {
                                             <Card>
                                                 <CardHeader className="flex flex-row items-center justify-between">
                                                     <div>
-                                                        <h3 className="text-xl font-semibold">{bet.description}</h3>
+                                                        <h3 className="text-xl font-semibold">{bet.home} vs {bet.away}</h3>
                                                         <p className="text-muted-foreground capitalize">{bet.gameType}</p>
                                                     </div>
                                                     {getStatusIcon(bet.status)}
@@ -154,17 +156,13 @@ const HostedBets = () => {
                                                 <CardContent className="space-y-4">
                                                     <div className="flex justify-between items-center">
                                                         <span>Wager Amount:</span>
-                                                        <span>{bet.totalStake} ETH</span>
+                                                        <span>{Number(bet.totalStake) / Math.pow(10, 18)} ETH</span>
                                                     </div>
                                                     <div className="flex justify-between items-center">
                                                         <span>Status:</span>
                                                         <span className={getStatusColor(bet.status)}>
                                                             {bet.status?.toUpperCase() || 'ACTIVE'}
                                                         </span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span>Date:</span>
-                                                        <span>{bet.timestamp}</span>
                                                     </div>
                                                 </CardContent>
                                             </Card>
