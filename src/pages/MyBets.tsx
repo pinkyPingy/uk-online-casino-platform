@@ -29,7 +29,7 @@ const MyBets = () => {
           const parsedBets = Array.from(fetchedBets.data).map((proxyItem) => {
             const myBet = transformPostView(proxyItem)
             myBet["wagerAmount"] = myBet["totalStake"] / Math.pow(10, 18)
-            myBet["status"] = "Finished"?"Not Finish":myBet["isFinised"]
+            myBet["status"] = myBet["isFinish"]?"Finished":"Not Finish"
             myBet["myBetHome"] = Number(myBet["myBet"][0]) / Math.pow(10, 18)
             myBet["myBetAway"] = Number(myBet["myBet"][1]) / Math.pow(10, 18)
             return myBet
