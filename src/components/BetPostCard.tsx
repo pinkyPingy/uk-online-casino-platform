@@ -44,7 +44,7 @@ export const BetPostCard = ({ post, matchDetails }: BetPostCardProps) => {
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-xl font-semibold">{matchDetails.home} vs {matchDetails.away}</h3>
-            <p className="text-sm text-muted-foreground">Created by: {post.creator}</p>
+            {/* <p className="text-sm text-muted-foreground">Created by: {post.creator}</p> */}
           </div>
           {post.isResolved && (
             <Trophy className={`w-6 h-6 ${post.isClaimed ? 'text-green-500' : 'text-yellow-500'}`} />
@@ -62,7 +62,7 @@ export const BetPostCard = ({ post, matchDetails }: BetPostCardProps) => {
             <p className="font-medium">{post.awayHandicap}</p>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">Total Banker Stake:</span>
@@ -84,8 +84,8 @@ export const BetPostCard = ({ post, matchDetails }: BetPostCardProps) => {
       </CardContent>
       <CardFooter>
         {post.isResolved && !post.isClaimed && (
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             onClick={handleClaimReward}
             disabled={isProcessing}
           >

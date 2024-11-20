@@ -92,9 +92,11 @@ const AvailableBets = () => {
               parseFloat(processedData["awayBets"]),
             ) /
             1000000000;
+          processedData["home"] = bet["13"];
+          processedData["away"] = bet["14"];
           return processedData;
         });
-        console.log(bets);
+        console.log("BETSSS: ", bets);
 
         setBets(bets);
         setHasMoreBets(result.haveMorePageAvailable);

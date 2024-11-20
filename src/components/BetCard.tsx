@@ -8,8 +8,8 @@ export const BetCard = ({ bet }) => {
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-semibold">{bet.description}</h3>
-            <p className="text-sm text-secondary">Created by: {bet.creator}</p>
+            <h3 className="text-xl font-semibold">{bet.home} vs {bet.away}</h3>
+            {/* <p className="text-sm text-secondary">Created by: {bet.creator}</p> */}
           </div>
         </div>
       </CardHeader>
