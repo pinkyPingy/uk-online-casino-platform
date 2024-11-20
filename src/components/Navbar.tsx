@@ -1,11 +1,17 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Wallet2, Menu } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Wallet2, Menu, Shield } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAdmin } from "@/hooks/useAdmin";
+import { useToast } from "@/components/ui/use-toast";
 
 const Navbar = () => {
   const [isConnected, setIsConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { isAdmin } = useAdmin(walletAddress);
   
   const handleConnect = async () => {
     try {
@@ -14,12 +20,23 @@ const Navbar = () => {
           method: "eth_requestAccounts",
         });
         console.log("Wallet connected:", accounts[0]);
+        setWalletAddress(accounts[0]);
         setIsConnected(true);
       } else {
         console.log("Please install MetaMask");
+        toast({
+          title: "MetaMask Required",
+          description: "Please install MetaMask to connect your wallet",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error connecting wallet:", error);
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect wallet. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -49,6 +66,17 @@ const Navbar = () => {
       >
         My Bets
       </Link>
+      {isAdmin && (
+        <Link
+          to="/create-match"
+          className={`nav-link flex items-center gap-2 bg-secondary/10 px-3 py-1 rounded-md ${
+            location.pathname === "/create-match" ? "text-secondary" : ""
+          }`}
+        >
+          <Shield className="w-4 h-4" />
+          Create Match
+        </Link>
+      )}
     </>
   );
 

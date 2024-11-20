@@ -1,118 +1,113 @@
-import { ethers } from 'ethers';
-
-const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
-const CONTRACT_ABI = [
-  // Add your contract ABI here
-];
+import { ethers } from "ethers";
 
 class SmartContractService {
-  constructor() {
-    this.contract = null;
-    this.provider = null;
-    this.signer = null;
-    this.initializeContract();
+  private contractOwner: string | null = null;
+  private contract: ethers.Contract | null = null;
+
+  async getContractOwner(): Promise<string> {
+    if (this.contractOwner) return this.contractOwner;
+    
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(
+        "YOUR_CONTRACT_ADDRESS",
+        ["function owner() view returns (address)"],
+        provider
+      );
+      
+      this.contractOwner = await contract.owner();
+      console.log("Contract owner fetched:", this.contractOwner);
+      return this.contractOwner;
+    } catch (error) {
+      console.error("Error getting contract owner:", error);
+      throw error;
+    }
   }
 
-  async initializeContract() {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        this.provider = new ethers.BrowserProvider(window.ethereum);
-        this.signer = await this.provider.getSigner();
-        this.contract = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          CONTRACT_ABI,
-          this.signer
-        );
-        console.log('Smart contract initialized successfully');
-      } catch (error) {
-        console.error('Failed to initialize contract:', error);
+  async isAdmin(address: string): Promise<boolean> {
+    try {
+      const owner = await this.getContractOwner();
+      const isAdmin = owner.toLowerCase() === address.toLowerCase();
+      console.log("Admin check:", { address, owner, isAdmin });
+      return isAdmin;
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      return false;
+    }
+  }
+
+  async createMatch(home: string, away: string): Promise<void> {
+    try {
+      if (!this.contract) {
+        throw new Error("Contract not initialized");
       }
-    }
-  }
-
-  async createBet(bet) {
-    if (!this.contract) throw new Error('Contract not initialized');
-    
-    try {
-      console.log('Creating bet on blockchain:', bet);
-      const tx = await this.contract.createBet(
-        bet.gameType,
-        ethers.parseEther(bet.wagerAmount),
-        ethers.parseEther(bet.poolLimit),
-        bet.description
-      );
-      
-      const receipt = await tx.wait();
-      console.log('Bet created successfully:', receipt);
-      return receipt;
+      const tx = await this.contract.createMatch(home, away);
+      await tx.wait();
+      console.log("Match created successfully");
     } catch (error) {
-      console.error('Error creating bet:', error);
+      console.error("Error creating match:", error);
       throw error;
     }
   }
 
-  async contributeToBet(betId, amount) {
-    if (!this.contract) throw new Error('Contract not initialized');
-    
+  async placeBet(matchId: string, amount: string): Promise<void> {
     try {
-      console.log('Contributing to bet:', betId, amount);
-      const tx = await this.contract.contributeToBet(
-        betId,
-        { value: ethers.parseEther(amount) }
-      );
-      
-      const receipt = await tx.wait();
-      console.log('Contribution successful:', receipt);
-      return receipt;
+      if (!this.contract) {
+        throw new Error("Contract not initialized");
+      }
+      const tx = await this.contract.placeBet(matchId, { value: ethers.parseEther(amount) });
+      await tx.wait();
+      console.log("Bet placed successfully");
     } catch (error) {
-      console.error('Error contributing to bet:', error);
+      console.error("Error placing bet:", error);
       throw error;
     }
   }
 
-  async makeBet(betId, amount) {
-    if (!this.contract) throw new Error('Contract not initialized');
-    
+  async getMatches(): Promise<any[]> {
     try {
-      console.log('Making bet:', betId, amount);
-      const tx = await this.contract.makeBet(
-        betId,
-        { value: ethers.parseEther(amount) }
-      );
-      
-      const receipt = await tx.wait();
-      console.log('Bet placed successfully:', receipt);
-      return receipt;
+      if (!this.contract) {
+        throw new Error("Contract not initialized");
+      }
+      const matches = await this.contract.getMatches();
+      return matches;
     } catch (error) {
-      console.error('Error making bet:', error);
+      console.error("Error getting matches:", error);
       throw error;
     }
   }
 
-  async getBet(betId) {
-    if (!this.contract) throw new Error('Contract not initialized');
-    
+  async getBets(address: string): Promise<any[]> {
     try {
-      console.log('Fetching bet:', betId);
-      const bet = await this.contract.getBet(betId);
-      console.log('Bet fetched successfully:', bet);
-      return bet;
-    } catch (error) {
-      console.error('Error fetching bet:', error);
-      throw error;
-    }
-  }
-
-  async getAllBets() {
-    if (!this.contract) throw new Error('Contract not initialized');
-    
-    try {
-      console.log('Fetching all bets');
-      const bets = await this.contract.getAllBets();
-      console.log('Bets fetched successfully:', bets);
+      if (!this.contract) {
+        throw new Error("Contract not initialized");
+      }
+      const bets = await this.contract.getBetsByAddress(address);
       return bets;
     } catch (error) {
-      console.error('Error fetching bets:', error);
+      console.error("Error getting bets:", error);
+      throw error;
+    }
+  }
+
+  async initialize(): Promise<void> {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      this.contract = new ethers.Contract(
+        "YOUR_CONTRACT_ADDRESS",
+        [
+          "function owner() view returns (address)",
+          "function createMatch(string memory home, string memory away) external",
+          "function placeBet(uint256 matchId) external payable",
+          "function getMatches() external view returns (tuple(uint256 id, string home, string away, uint256 startTime, bool isActive)[])",
+          "function getBetsByAddress(address better) external view returns (tuple(uint256 matchId, uint256 amount, uint256 timestamp)[])"
+        ],
+        signer
+      );
+      console.log("Contract initialized successfully");
+    } catch (error) {
+      console.error("Error initializing contract:", error);
       throw error;
     }
   }

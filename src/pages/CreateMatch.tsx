@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
@@ -14,6 +14,45 @@ const CreateMatch = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  useEffect(() => {
+    const checkAuthorization = async () => {
+      try {
+        if (typeof window.ethereum === "undefined") {
+          navigate("/");
+          return;
+        }
+
+        const accounts = await window.ethereum.request({
+          method: "eth_accounts",
+        });
+
+        if (!accounts || accounts.length === 0) {
+          navigate("/");
+          return;
+        }
+
+        const isAdmin = await smartContractService.isAdmin(accounts[0]);
+        if (!isAdmin) {
+          toast({
+            title: "Unauthorized Access",
+            description: "You don't have permission to access this page",
+            variant: "destructive",
+          });
+          navigate("/");
+          return;
+        }
+
+        setIsAuthorized(true);
+      } catch (error) {
+        console.error("Error checking authorization:", error);
+        navigate("/");
+      }
+    };
+
+    checkAuthorization();
+  }, [navigate, toast]);
 
   const form = useForm({
     defaultValues: {
@@ -43,6 +82,10 @@ const CreateMatch = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
