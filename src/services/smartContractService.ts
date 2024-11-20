@@ -12,7 +12,7 @@ class SmartContractService {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       this.contract = new ethers.Contract(
-        "0x1c307257BFE924Afd9ebf442710832353070F26a", // Contract address
+        "0x50BD9b10f3f9309c0755e8e68012C8Fabd24F80C", // Contract address
         [
           "function getOwner() view returns (address)",
           "function createMatch(string memory home, string memory away) external",

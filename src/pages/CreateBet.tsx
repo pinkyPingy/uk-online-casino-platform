@@ -32,8 +32,20 @@ const CreateBet = () => {
     const fetchMatches = async () => {
       try {
         const result = await smartContractService.getActiveMatches(1000, 0);
-        console.log("Matches are: ", result.data)
-        setMatches(result.data);
+        console.log("Raw Matches are: ", result.data);
+
+        // Transform the proxy objects into usable data
+        const processedMatches = Array.from(result.data).map((proxyItem) => {
+          const matchData = {};
+          for (const [key, value] of Object.entries(proxyItem)) {
+            matchData[key] = value;
+          }
+          return matchData;
+        });
+
+        console.log("Processed Matches: ", processedMatches);
+
+        setMatches(processedMatches);
         setHasMore(result.haveMorePageAvailable);
       } catch (error) {
         console.error("Error fetching matches:", error);
@@ -42,6 +54,7 @@ const CreateBet = () => {
 
     fetchMatches();
   }, []);
+
 
   const onSubmit = async (values) => {
     try {
@@ -98,16 +111,26 @@ const CreateBet = () => {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormItem>
                     <FormLabel>Select Match</FormLabel>
-                    <Select onValueChange={setSelectedMatch}>
+                    <Select value={selectedMatch} onValueChange={(value) => setSelectedMatch(value)}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a match" />
+                          <SelectValue>
+                            {selectedMatch
+                              ? (() => {
+                                // Find the selected match using String conversion for BigInt comparison
+                                const selected = matches.find(
+                                  (match) => String(match[0]) === selectedMatch // Match ID is in the 0th index and BigInt
+                                );
+                                return selected ? `${selected[1]} vs ${selected[2]}` : "Select a match";
+                              })()
+                              : "Select a match"}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {matches.map((match) => (
-                          <SelectItem key={match.id} value={match.id}>
-                            {match.home} vs {match.away}
+                          <SelectItem key={match[0]} value={String(match[0])}>  {/* Convert BigInt to string */}
+                            {match[1]} vs {match[2]}
                           </SelectItem>
                         ))}
                       </SelectContent>
