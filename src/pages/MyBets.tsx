@@ -29,7 +29,7 @@ const MyBets = () => {
           const parsedBets = Array.from(fetchedBets.data).map((proxyItem) => {
             const myBet = transformPostView(proxyItem)
             myBet["wagerAmount"] = myBet["totalStake"] / Math.pow(10, 18)
-            myBet["status"] = myBet["isFinish"]?"Finished":"Not Finish"
+            myBet["status"] = myBet["isFinished"]?"Finished":"Not Finish"
             myBet["myBetHome"] = Number(myBet["myBet"]["awayBet"]) / Math.pow(10, 18)
             myBet["myBetAway"] = Number(myBet["myBet"]["homeBet"]) / Math.pow(10, 18)
             return myBet
@@ -98,6 +98,21 @@ const MyBets = () => {
         return "text-muted";
     }
   };
+
+  const onclick = async (values) => {
+    try {
+      console.log("Claming bet with values:", values)
+      const res = await smartContractService.claimBettingReward(values.id)
+      console.log(res)
+    } catch (error) {
+      console.error("Error creating bet:", error)
+      toast({
+        title: "Error Claming Bet",
+        description: "There was an error claming your bet. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }
 
   if (!isConnected) {
     return (
@@ -176,6 +191,12 @@ const MyBets = () => {
                               {bet.status?.toUpperCase()}
                             </span>
                           </div>
+                          <Button
+                                                                className="w-full mt-4"
+                                          onClick={() => onclick(bet)}
+                                          >
+                                                                Claim Rewards
+                                                            </Button>
                           {bet.status === "active" && (
                             <Button
                               className="w-full mt-4"
