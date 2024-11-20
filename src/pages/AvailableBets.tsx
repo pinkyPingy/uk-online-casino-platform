@@ -57,6 +57,32 @@ const AvailableBets = () => {
         // setBets((prevBets) => (page === 0 ? result.data : [...prevBets, ...result.data]));
         setBets(result.data);
         console.log("Bets: ", result.data)
+        // Transform the proxy objects into usable data
+        const parsedBets = Array.from(result.data).map((proxyItem) => {
+          const betData = {};
+          for (const [key, value] of Object.entries(proxyItem)) {
+            betData[key] = value;
+          }
+          return betData;
+        });
+
+        console.log("Parsed Bets: ", parsedBets);
+
+        const bets = Array.from(parsedBets).map((bet) => {
+          const processedData = {}
+          processedData["homeHandicap"] = parseInt(bet["2"])
+          processedData["awayHandicap"] = parseInt(bet["3"])
+          processedData["totalStake"] = parseInt(bet["4"]) / 1000000000
+          processedData["homeBets"] = parseInt(bet["6"]["0"])
+          processedData["awayBets"] = parseInt(bet["6"]["1"])
+          processedData["maxBetAvailable"] = parseFloat(processedData["totalStake"]) - 
+    (Math.abs(parseFloat(processedData["homeBets"]) - parseFloat(processedData["awayBets"])))/  1000000000
+ ;
+          return processedData
+        })
+        console.log(bets)
+
+        setBets(bets)
         setHasMoreBets(result.haveMorePageAvailable);
       } catch (error) {
         console.error("Error fetching bets:", error);
