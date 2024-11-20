@@ -5,6 +5,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function transformBetting(betData: any) {
+  const parsedData = Array.from(betData);
+
+  return {
+    homeBet: parsedData[0],
+    awayBet: parsedData[1],
+    isClaimed: parsedData[2],
+    isInitialized: parsedData[3],
+  }
+}
+
 export function transformPostView(betData: any, isForBankerView: boolean = false) {
 
   return {
@@ -14,8 +25,8 @@ export function transformPostView(betData: any, isForBankerView: boolean = false
     awayHandicapScore: Number(betData[3]),
     totalStake: Number(betData[4]), // Convert BigInt to number
     myStake: Number(betData[5]),
-    totalBet: betData[6], // Assuming this is a custom object, handle accordingly
-    myBet: betData[7], // Handle similarly to totalBet
+    totalBet: transformBetting(betData[6]), // Assuming this is a custom object, handle accordingly
+    myBet: transformBetting(betData[7]), // Handle similarly to totalBet
     isInitialized: betData[8],
     isFinished: betData[9],
     isAlreadyMadeABet: betData[10],
