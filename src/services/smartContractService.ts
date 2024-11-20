@@ -8,7 +8,7 @@ const CONTRACT_ABI = [
 
 export class SmartContractService {
   private contract: ethers.Contract | null = null;
-  private provider: ethers.Provider | null = null;
+  private provider: ethers.BrowserProvider | null = null;
   private signer: ethers.Signer | null = null;
 
   constructor() {

@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
-import { Users, Coins, Timer } from "lucide-react";
 import type { Bet } from "@/types/bet";
 import { BetCard } from "@/components/BetCard";
-import { BetActions } from "@/components/BetActions";
 
 const mockBets: Bet[] = [
   {
@@ -23,9 +18,10 @@ const mockBets: Bet[] = [
     remainingPool: "3.0",
     players: [],
     contributors: [
-      { address: "0x1234...5678", amount: "2.0" }
+      { address: "0x1234...5678", amount: "2.0", timestamp: Date.now() }
     ],
-    status: "open"
+    status: "open",
+    createdAt: Date.now()
   },
   {
     id: "2",
@@ -38,14 +34,14 @@ const mockBets: Bet[] = [
     remainingPool: "0.7",
     players: [],
     contributors: [
-      { address: "0x8765...4321", amount: "0.3" }
+      { address: "0x8765...4321", amount: "0.3", timestamp: Date.now() }
     ],
-    status: "open"
+    status: "open",
+    createdAt: Date.now()
   },
 ];
 
 const AvailableBets = () => {
-  const { toast } = useToast();
   const [filter, setFilter] = useState({ gameType: "all", minWager: "" });
   const [bets] = useState<Bet[]>(mockBets);
 

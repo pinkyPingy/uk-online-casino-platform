@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import type { Bet } from "@/types/bet";
 
 interface BetActionsProps {
@@ -14,6 +16,7 @@ export const BetActions = ({ bet }: BetActionsProps) => {
   const [contributionAmount, setContributionAmount] = useState("");
   const [isContributing, setIsContributing] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
+  const [betSide, setBetSide] = useState<"true" | "false">("true");
 
   const handleContribution = async () => {
     try {
@@ -38,7 +41,7 @@ export const BetActions = ({ bet }: BetActionsProps) => {
   const handleBet = async () => {
     try {
       setIsBetting(true);
-      console.log("Making bet:", bet.id);
+      console.log("Making bet:", bet.id, "Side:", betSide);
       toast({
         title: "Making Bet",
         description: "Transaction initiated. Please confirm in your wallet.",
@@ -85,13 +88,42 @@ export const BetActions = ({ bet }: BetActionsProps) => {
         </DialogContent>
       </Dialog>
 
-      <Button 
-        className="w-full" 
-        onClick={handleBet}
-        disabled={isBetting}
-      >
-        {isBetting ? "Processing..." : "Make Bet"}
-      </Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button className="w-full">Make Bet</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Place Your Bet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Choose your side</Label>
+              <RadioGroup
+                defaultValue="true"
+                onValueChange={(value) => setBetSide(value as "true" | "false")}
+                className="flex flex-col space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="true" id="true" />
+                  <Label htmlFor="true">True</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="false" id="false" />
+                  <Label htmlFor="false">False</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <Button 
+              className="w-full" 
+              onClick={handleBet}
+              disabled={isBetting}
+            >
+              {isBetting ? "Processing..." : "Confirm Bet"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
