@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function transformPostView(betData: any) {
+export function transformPostView(betData: any, isForBankerView: boolean = false) {
 
   return {
     id: betData[0].toString(), // Convert BigInt to string
@@ -23,6 +23,6 @@ export function transformPostView(betData: any) {
     bankerRewardClaimed: betData[12],
     home: betData[13],
     away: betData[14],
-    // isClaimed: betData[13], // Assuming `isClaimed` is at index 13 in the data
+    status: betData[8] && !betData[9] ? 'ACTIVE' : betData[8] && betData[9] && ((betData[12] && isForBankerView) || (betData[11] && !isForBankerView)) ? 'CLAIMED' : 'NOT_CLAIMED',
   };
 }
