@@ -32,7 +32,7 @@ const CreateBet = () => {
     const fetchMatches = async () => {
       try {
         const result = await smartContractService.getActiveMatches(1000, 0);
-        console.log("Raw Matches are: ", result.data);
+        // console.log("Raw Matches are: ", result.data);
 
         // Transform the proxy objects into usable data
         const processedMatches = Array.from(result.data).map((proxyItem) => {
