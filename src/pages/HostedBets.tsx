@@ -16,7 +16,7 @@ const HostedBets = () => {
     const { isConnected, walletAddress } = useWallet();
     const [bankerBets, setBankerBets] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(0);
     const [haveMore, setHaveMore] = useState(true);
 
     useEffect(() => {
@@ -126,18 +126,58 @@ const HostedBets = () => {
                     ) : bankerBets.length === 0 ? (
                         <p>You have no hosted bets.</p>
                     ) : (
-                        <Tabs defaultValue="active" className="w-full">
+                        <Tabs defaultValue="all" className="w-full">
                             <TabsList>
+                                <TabsTrigger value="all">All Bets</TabsTrigger>
                                 <TabsTrigger value="active">Active</TabsTrigger>
-                                <TabsTrigger value="claimed">Claimed</TabsTrigger>
+                                <TabsTrigger value="resolved">Resolved</TabsTrigger> {/* Resolved Tab */}
                             </TabsList>
+
+                            {/* All Bets */}
+                            <TabsContent value="all" className="mt-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {bankerBets.map((bet) => (
+                                        <motion.div
+                                            key={bet.id}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <Card>
+                                                <CardHeader className="flex flex-row items-center justify-between">
+                                                    <div>
+                                                        <h3 className="text-xl font-semibold">{bet.description}</h3>
+                                                        <p className="text-muted-foreground capitalize">{bet.gameType}</p>
+                                                    </div>
+                                                    {getStatusIcon(bet.status)}
+                                                </CardHeader>
+                                                <CardContent className="space-y-4">
+                                                    <div className="flex justify-between items-center">
+                                                        <span>Wager Amount:</span>
+                                                        <span>{bet.totalStake} ETH</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span>Status:</span>
+                                                        <span className={getStatusColor(bet.status)}>
+                                                            {bet.status?.toUpperCase() || 'ACTIVE'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span>Date:</span>
+                                                        <span>{bet.timestamp}</span>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </TabsContent>
 
                             {/* Active Bets */}
                             <TabsContent value="active" className="mt-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {bankerBets
-                                        .filter((bet) => bet.isFinished && !bet.isInitialized //&& !bet.isClaimed
-                                        ) // Adjust condition TODO
+                                        .filter((bet) => bet.status === 'ACTIVE')
                                         .map((bet) => (
                                             <motion.div
                                                 key={bet.id}
@@ -151,55 +191,7 @@ const HostedBets = () => {
                                                             <h3 className="text-xl font-semibold">{bet.description}</h3>
                                                             <p className="text-muted-foreground capitalize">{bet.gameType}</p>
                                                         </div>
-                                                        {getStatusIcon(bet.status)} {/* Assuming getStatusIcon is implemented */}
-                                                    </CardHeader>
-                                                    <CardContent className="space-y-4">
-                                                        <div className="flex justify-between items-center">
-                                                            <span>Wager Amount:</span>
-                                                            <span>{bet.totalStake} ETH</span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center">
-                                                            <span>Status:</span>
-                                                            <span className={getStatusColor(bet.status)}>
-                                                                {bet.status?.toUpperCase() || 'ACTIVE'}  {/*TODO*/}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center">
-                                                            <span>Date:</span>
-                                                            <span>{bet.timestamp}</span>
-                                                        </div>
-                                                        <Button
-                                                            className="w-full mt-4"
-                                                            onClick={() => handleClaimReward(bet.id)} // Assuming handleClaimReward is implemented
-                                                        >
-                                                            Claim Reward
-                                                        </Button>
-                                                    </CardContent>
-                                                </Card>
-                                            </motion.div>
-                                        ))}
-                                </div>
-                            </TabsContent>
-
-                            {/* Claimed Bets */}
-                            <TabsContent value="claimed">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {bankerBets
-                                        .filter((bet) => bet.status === "claimed" && bet.isInitialized) // Adjust condition
-                                        .map((bet) => (
-                                            <motion.div
-                                                key={bet.id}
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ duration: 0.3 }}
-                                            >
-                                                <Card>
-                                                    <CardHeader className="flex flex-row items-center justify-between">
-                                                        <div>
-                                                            <h3 className="text-xl font-semibold">{bet.description}</h3>
-                                                            <p className="text-muted-foreground capitalize">{bet.gameType}</p>
-                                                        </div>
-                                                        {getStatusIcon(bet.status)} {/* Assuming getStatusIcon is implemented */}
+                                                        {getStatusIcon(bet.status)}
                                                     </CardHeader>
                                                     <CardContent className="space-y-4">
                                                         <div className="flex justify-between items-center">
@@ -212,16 +204,61 @@ const HostedBets = () => {
                                                                 {bet.status.toUpperCase()}
                                                             </span>
                                                         </div>
-                                                        <div className="flex justify-between items-center">
-                                                            <span>Date:</span>
-                                                            <span>{bet.timestamp}</span>
-                                                        </div>
                                                     </CardContent>
                                                 </Card>
                                             </motion.div>
                                         ))}
                                 </div>
                             </TabsContent>
+
+                            {/* Resolved Bets */}
+                            <TabsContent value="resolved" className="mt-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {bankerBets
+                                        .filter((bet) => bet.status === 'CLAIMED' || bet.status === 'NOT_CLAIMED')
+                                        .map((bet) => (
+                                            <motion.div
+                                                key={bet.id}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <Card>
+                                                    <CardHeader className="flex flex-row items-center justify-between">
+                                                        <div>
+                                                            <h3 className="text-xl font-semibold">{bet.description}</h3>
+                                                            <p className="text-muted-foreground capitalize">{bet.gameType}</p>
+                                                        </div>
+                                                        {getStatusIcon(bet.status)}
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Wager Amount:</span>
+                                                            <span>{bet.totalStake} ETH</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span>Status:</span>
+                                                            <span className={getStatusColor(bet.status)}>
+                                                                {bet.status?.toUpperCase() || 'RESOLVED'}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Conditionally render the 'Claim Rewards' button if the status is 'NOT_CLAIMED' */}
+                                                        {bet.status === 'NOT_CLAIMED' && (
+                                                            <Button
+                                                                className="w-full mt-4"
+                                                                onClick={() => handleClaimReward(bet.id)} // Assuming handleClaimReward is implemented
+                                                            >
+                                                                Claim Rewards
+                                                            </Button>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+                                        ))}
+                                </div>
+                            </TabsContent>
+
                         </Tabs>
                     )}
                 </motion.div>

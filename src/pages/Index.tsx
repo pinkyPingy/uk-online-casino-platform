@@ -15,14 +15,14 @@ const Index = () => {
           className="text-center mb-16"
         >
           <h1 className="text-5xl font-bold text-secondary mb-4">
-            Welcome to BidKub
+          Win Big at UK888💰
           </h1>
           <p className="text-xl text-muted max-w-2xl mx-auto">
-            The next generation of decentralized betting on Base Layer 2.
-            Create, join, and win with complete transparency.
+            The next generation of decentralized betting,
+            get rich fast and easy.
           </p>
           <h2 className="text-2xl font-bold mt-4">
-            Connect your MetaMask Wallet for more details.
+            Connect your MetaMask Wallet now!!.
           </h2>
         </motion.div>
 
