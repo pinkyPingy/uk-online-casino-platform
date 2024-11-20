@@ -1,44 +1,13 @@
-import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Wallet2, Menu, Shield } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAdmin } from "@/hooks/useAdmin";
-import { useToast } from "@/components/ui/use-toast";
+import { useWallet } from "@/context/WalletContext";
 
 const Navbar = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const { isConnected, walletAddress, connectWallet } = useWallet();
   const location = useLocation();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const { isAdmin } = useAdmin(walletAddress);
-
-  const handleConnect = async () => {
-    try {
-      if (typeof window.ethereum !== "undefined") {
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-        console.log("Wallet connected:", accounts[0]);
-        setWalletAddress(accounts[0]);
-        setIsConnected(true);
-      } else {
-        console.log("Please install MetaMask");
-        toast({
-          title: "MetaMask Required",
-          description: "Please install MetaMask to connect your wallet",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      toast({
-        title: "Connection Error",
-        description: "Failed to connect wallet. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const NavLinks = () => (
     <>
@@ -111,7 +80,7 @@ const Navbar = () => {
           </div>
 
           <button
-            onClick={handleConnect}
+            onClick={connectWallet}
             className={`flex items-center space-x-2 ${isConnected ? "btn-primary" : "btn-secondary"}`}
           >
             <Wallet2 className="w-5 h-5" />
