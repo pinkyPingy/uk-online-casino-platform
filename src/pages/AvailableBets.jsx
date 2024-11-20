@@ -3,10 +3,9 @@ import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
-import type { Bet } from "@/types/bet";
-import { BetCard } from "@/components/BetCard";
+import BetCard from "@/components/BetCard";
 
-const mockBets: Bet[] = [
+const mockBets = [
   {
     id: "1",
     gameType: "sports",
@@ -43,7 +42,7 @@ const mockBets: Bet[] = [
 
 const AvailableBets = () => {
   const [filter, setFilter] = useState({ gameType: "all", minWager: "" });
-  const [bets] = useState<Bet[]>(mockBets);
+  const [bets] = useState(mockBets);
 
   return (
     <div className="min-h-screen bg-background">

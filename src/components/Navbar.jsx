@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Wallet2, Menu, X } from "lucide-react";
+import { Wallet2, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Navbar = () => {
@@ -60,12 +60,10 @@ const Navbar = () => {
             BidKub
           </Link>
           
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <NavLinks />
           </div>
           
-          {/* Mobile Navigation */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>

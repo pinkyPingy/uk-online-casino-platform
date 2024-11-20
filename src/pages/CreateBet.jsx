@@ -7,25 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import Navbar from "@/components/Navbar";
-
-const formSchema = z.object({
-  gameType: z.string().min(1, "Game type is required"),
-  wagerAmount: z.string().min(1, "Wager amount is required"),
-  poolLimit: z.string().optional(),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-});
 
 const CreateBet = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm({
     defaultValues: {
       gameType: "sports",
       wagerAmount: "",
@@ -34,7 +24,7 @@ const CreateBet = () => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values) => {
     try {
       setIsSubmitting(true);
       console.log("Creating bet with values:", values);

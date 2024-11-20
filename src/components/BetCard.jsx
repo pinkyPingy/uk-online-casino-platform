@@ -2,7 +2,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Coins, Users, Timer } from "lucide-react";
 import { BetActions } from "./BetActions";
 
-const BetCard = ({ bet }) => {
+export const BetCard = ({ bet }) => {
   return (
     <Card className="h-full">
       <CardHeader>

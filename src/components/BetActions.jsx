@@ -5,18 +5,13 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import type { Bet } from "@/types/bet";
 
-interface BetActionsProps {
-  bet: Bet;
-}
-
-export const BetActions = ({ bet }: BetActionsProps) => {
+export const BetActions = ({ bet }) => {
   const { toast } = useToast();
   const [contributionAmount, setContributionAmount] = useState("");
   const [isContributing, setIsContributing] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
-  const [betSide, setBetSide] = useState<"true" | "false">("true");
+  const [betSide, setBetSide] = useState("true");
 
   const handleContribution = async () => {
     try {
@@ -101,7 +96,7 @@ export const BetActions = ({ bet }: BetActionsProps) => {
               <Label>Choose your side</Label>
               <RadioGroup
                 defaultValue="true"
-                onValueChange={(value) => setBetSide(value as "true" | "false")}
+                onValueChange={(value) => setBetSide(value)}
                 className="flex flex-col space-y-2"
               >
                 <div className="flex items-center space-x-2">
@@ -127,3 +122,5 @@ export const BetActions = ({ bet }: BetActionsProps) => {
     </div>
   );
 };
+
+export default BetActions;
