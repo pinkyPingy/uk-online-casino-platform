@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Navbar from "@/components/Navbar";
 import BetCard from "@/components/BetCard";
 import { smartContractService } from "@/services/smartContractService";
@@ -53,10 +59,14 @@ const AvailableBets = () => {
       setIsLoadingBets(true);
       try {
         // console.log("Selected Match ID: ", Number(selectedMatch))
-        const result = await smartContractService.getPostsByMatchId(Number(selectedMatch), 100, 0);
+        const result = await smartContractService.getPostsByMatchId(
+          Number(selectedMatch),
+          100,
+          0,
+        );
         // setBets((prevBets) => (page === 0 ? result.data : [...prevBets, ...result.data]));
         setBets(result.data);
-        console.log("Bets: ", result.data)
+        console.log("Bets: ", result.data);
         // Transform the proxy objects into usable data
         const parsedBets = Array.from(result.data).map((proxyItem) => {
           const betData = {};
@@ -69,20 +79,24 @@ const AvailableBets = () => {
         console.log("Parsed Bets: ", parsedBets);
 
         const bets = Array.from(parsedBets).map((bet) => {
-          const processedData = {}
-          processedData["homeHandicap"] = parseInt(bet["2"])
-          processedData["awayHandicap"] = parseInt(bet["3"])
-          processedData["totalStake"] = parseInt(bet["4"]) / 1000000000
-          processedData["homeBets"] = parseInt(bet["6"]["0"])
-          processedData["awayBets"] = parseInt(bet["6"]["1"])
-          processedData["maxBetAvailable"] = parseFloat(processedData["totalStake"]) - 
-    (Math.abs(parseFloat(processedData["homeBets"]) - parseFloat(processedData["awayBets"])))/  1000000000
- ;
-          return processedData
-        })
-        console.log(bets)
+          const processedData = {};
+          processedData["homeHandicap"] = parseInt(bet["2"]);
+          processedData["awayHandicap"] = parseInt(bet["3"]);
+          processedData["totalStake"] = parseInt(bet["4"]) / 1000000000;
+          processedData["homeBets"] = parseInt(bet["6"]["0"]) / 1000000000;
+          processedData["awayBets"] = parseInt(bet["6"]["1"]) / 1000000000;
+          processedData["maxBetAvailable"] =
+            parseFloat(processedData["totalStake"]) -
+            Math.abs(
+              parseFloat(processedData["homeBets"]) -
+                parseFloat(processedData["awayBets"]),
+            ) /
+              1000000000;
+          return processedData;
+        });
+        console.log(bets);
 
-        setBets(bets)
+        setBets(bets);
         setHasMoreBets(result.haveMorePageAvailable);
       } catch (error) {
         console.error("Error fetching bets:", error);
@@ -108,7 +122,9 @@ const AvailableBets = () => {
           className="space-y-8"
         >
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <h1 className="text-3xl font-bold text-secondary">Available Bets</h1>
+            <h1 className="text-3xl font-bold text-secondary">
+              Available Bets
+            </h1>
             <Select
               onValueChange={(value) => {
                 // Handle both "all" and individual match selection
@@ -121,22 +137,28 @@ const AvailableBets = () => {
                 <SelectValue>
                   {selectedMatch
                     ? (() => {
-                      // Find the selected match using String conversion for BigInt comparison
-                      const selected = matches.find(
-                        (match) => String(match[0]) === selectedMatch // Match ID is in the 0th index and BigInt
-                      );
-                      return selected ? `${selected[1]} vs ${selected[2]}` : "Select a match";
-                    })()
+                        // Find the selected match using String conversion for BigInt comparison
+                        const selected = matches.find(
+                          (match) => String(match[0]) === selectedMatch, // Match ID is in the 0th index and BigInt
+                        );
+                        return selected
+                          ? `${selected[1]} vs ${selected[2]}`
+                          : "Select a match";
+                      })()
                     : "Select a match"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" disabled>-- Select a match --</SelectItem>
+                <SelectItem value="all">All Matches</SelectItem>
                 {isLoadingMatches ? (
-                  <SelectItem value="all" disabled>Loading matches...</SelectItem>
+                  <SelectItem value="all" disabled>
+                    Loading matches...
+                  </SelectItem>
                 ) : (
                   matches.map((match) => (
-                    <SelectItem key={String(match[0])} value={String(match[0])}>  {/* Convert BigInt to string */}
+                    <SelectItem key={String(match[0])} value={String(match[0])}>
+                      {" "}
+                      {/* Convert BigInt to string */}
                       {match[1]} vs {match[2]}
                     </SelectItem>
                   ))
