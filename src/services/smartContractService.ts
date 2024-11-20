@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { PaginatedResponse, Match, Post,  } from "@/types/betting";
+import { PaginatedResponse, Match, Post, } from "@/types/betting";
 class SmartContractService {
   private contractOwner: string | null = null;
   private contract: ethers.Contract | null = null;
@@ -11,7 +11,7 @@ class SmartContractService {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       this.contract = new ethers.Contract(
-        "0x0249357d6A8Cff055e455769C1d6EFa9A2E51eeB", // Contract address
+        "0x0793C3C32Ae8bBEfF73348117de9EEF87018484c", // Contract address
         [
           "function getOwner() view returns (address)",
           "function createMatch(string memory home, string memory away) external",
@@ -92,7 +92,7 @@ class SmartContractService {
   async createBettingPost(matchId: number, homeHandicap: number, awayHandicap: number, amount: string): Promise<number> {
     try {
       await this.initialize(); // Ensure contract is initialized
-      const tx = await this.contract?.createBettingPost(matchId, homeHandicap, awayHandicap, {value: ethers.parseEther(amount)});
+      const tx = await this.contract?.createBettingPost(matchId, homeHandicap, awayHandicap, { value: ethers.parseEther(amount) });
       const receipt = await tx.wait();
       console.log("Betting post created:", receipt);
       return receipt.status; // You can return any relevant value from receipt
