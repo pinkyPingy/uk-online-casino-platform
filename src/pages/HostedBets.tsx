@@ -52,8 +52,7 @@ const HostedBets = () => {
             await smartContractService.bankerClaimReward(Number(postId));
             toast({
                 title: "Reward Claimed",
-                description: "Your reward has been successfully claimed.",
-                variant: "success",
+                description: "Your reward has been successfully claimed."
             });
         } catch (error) {
             console.error("Error claiming reward:", error);
