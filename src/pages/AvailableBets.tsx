@@ -6,25 +6,36 @@ import BetCard from "@/components/BetCard";
 import { smartContractService } from "@/services/smartContractService";
 
 const AvailableBets = () => {
-  const [matches, setMatches] = useState<any[]>([]); // Matches fetched from the contract
+  const [matches, setMatches] = useState<any[]>([]); // Store fetched matches
+  const [hasMore, setHasMore] = useState(false); // Handle pagination state
   const [selectedMatch, setSelectedMatch] = useState<string>(""); // Currently selected match
   const [bets, setBets] = useState<any[]>([]); // Bets for the selected match
   const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const [isLoadingBets, setIsLoadingBets] = useState(false);
-  const [page, setPage] = useState(1); // Pagination page for bets
+  const [page, setPage] = useState(0); // Pagination page for bets
   const [hasMoreBets, setHasMoreBets] = useState(false); // Check for more pages
 
   useEffect(() => {
-    // Fetch matches when the component loads
     const fetchMatches = async () => {
-      setIsLoadingMatches(true);
       try {
-        const result = await smartContractService.getActiveMatches(1000, 1);
-        setMatches(result.data);
+        const result = await smartContractService.getActiveMatches(1000, 0);
+        console.log("Raw Matches are: ", result.data);
+
+        // Transform the proxy objects into usable data
+        const processedMatches = Array.from(result.data).map((proxyItem) => {
+          const matchData = {};
+          for (const [key, value] of Object.entries(proxyItem)) {
+            matchData[key] = value;
+          }
+          return matchData;
+        });
+
+        console.log("Processed Matches: ", processedMatches);
+
+        setMatches(processedMatches);
+        setHasMore(result.haveMorePageAvailable);
       } catch (error) {
         console.error("Error fetching matches:", error);
-      } finally {
-        setIsLoadingMatches(false);
       }
     };
 
@@ -41,8 +52,11 @@ const AvailableBets = () => {
 
       setIsLoadingBets(true);
       try {
-        const result = await smartContractService.getPostsByMatchId(Number(selectedMatch), 10, page);
-        setBets((prevBets) => (page === 1 ? result.data : [...prevBets, ...result.data]));
+        // console.log("Selected Match ID: ", Number(selectedMatch))
+        const result = await smartContractService.getPostsByMatchId(Number(selectedMatch), 100, 0);
+        // setBets((prevBets) => (page === 0 ? result.data : [...prevBets, ...result.data]));
+        setBets(result.data);
+        console.log("Bets: ", result.data)
         setHasMoreBets(result.haveMorePageAvailable);
       } catch (error) {
         console.error("Error fetching bets:", error);
@@ -71,13 +85,24 @@ const AvailableBets = () => {
             <h1 className="text-3xl font-bold text-secondary">Available Bets</h1>
             <Select
               onValueChange={(value) => {
+                // Handle both "all" and individual match selection
                 setSelectedMatch(value === "all" ? "" : value);
                 setPage(1); // Reset to first page when selecting a new match
               }}
-              value={selectedMatch || "all"}
+              value={selectedMatch || "all"} // Default to "all" if no match is selected
             >
               <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Select a match" />
+                <SelectValue>
+                  {selectedMatch
+                    ? (() => {
+                      // Find the selected match using String conversion for BigInt comparison
+                      const selected = matches.find(
+                        (match) => String(match[0]) === selectedMatch // Match ID is in the 0th index and BigInt
+                      );
+                      return selected ? `${selected[1]} vs ${selected[2]}` : "Select a match";
+                    })()
+                    : "Select a match"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Matches</SelectItem>
@@ -85,8 +110,8 @@ const AvailableBets = () => {
                   <SelectItem value="all" disabled>Loading matches...</SelectItem>
                 ) : (
                   matches.map((match) => (
-                    <SelectItem key={match.id} value={match.id}>
-                      {match.home} vs {match.away}
+                    <SelectItem key={String(match[0])} value={String(match[0])}>  {/* Convert BigInt to string */}
+                      {match[1]} vs {match[2]}
                     </SelectItem>
                   ))
                 )}
