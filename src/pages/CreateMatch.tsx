@@ -70,7 +70,7 @@ const CreateMatch = () => {
         title: "Match Created Successfully",
         description: "The match has been created on the blockchain.",
       });
-      navigate("/available-matches");
+      navigate("/available");
     } catch (error) {
       console.error("Error creating match:", error);
       toast({
