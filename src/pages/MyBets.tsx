@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import { Trophy, Timer, AlertTriangle } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 import { smartContractService } from "@/services/smartContractService";
-import {transformPostView} from "@/lib/utils"
+import { transformPostView } from "@/lib/utils"
 
 const MyBets = () => {
   const { toast } = useToast();
@@ -29,7 +29,7 @@ const MyBets = () => {
           const parsedBets = Array.from(fetchedBets.data).map((proxyItem) => {
             const myBet = transformPostView(proxyItem)
             myBet["wagerAmount"] = myBet["totalStake"] / Math.pow(10, 18)
-            myBet["status"] = myBet["isFinished"]?"Finished":"Not Finish"
+            myBet["status"] = myBet["isFinished"] ? "Finished" : "Not Finish"
             myBet["myBetHome"] = Number(myBet["myBet"]["awayBet"]) / Math.pow(10, 18)
             myBet["myBetAway"] = Number(myBet["myBet"]["homeBet"]) / Math.pow(10, 18)
             return myBet
@@ -39,7 +39,7 @@ const MyBets = () => {
         } else {
           setBets([]);
         }
-        
+
       } catch (error) {
         console.error("Error fetching bets:", error);
         toast({
@@ -103,6 +103,7 @@ const MyBets = () => {
     try {
       console.log("Claming bet with values:", values)
       const res = await smartContractService.claimBettingReward(values.id)
+      values["status"] = "Finished"
       console.log(res)
     } catch (error) {
       console.error("Error creating bet:", error)
@@ -192,11 +193,11 @@ const MyBets = () => {
                             </span>
                           </div>
                           <Button
-                                                                className="w-full mt-4"
-                                          onClick={() => onclick(bet)}
-                                          >
-                                                                Claim Rewards
-                                                            </Button>
+                            className="w-full mt-4"
+                            onClick={() => onclick(bet)}
+                          >
+                            Claim Rewards
+                          </Button>
                           {bet.status === "active" && (
                             <Button
                               className="w-full mt-4"
