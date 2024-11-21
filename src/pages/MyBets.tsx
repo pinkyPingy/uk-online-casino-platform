@@ -165,7 +165,7 @@ const MyBets = () => {
                         <CardHeader className="flex flex-row items-center justify-between">
                           <div>
                             <h3 className="text-xl font-semibold">
-                              {bet.description}
+                              {bet.home} vs {bet.away}
                             </h3>
                             <p className="text-muted-foreground capitalize">
                               {bet.gameType}
@@ -192,12 +192,14 @@ const MyBets = () => {
                               {bet.status?.toUpperCase()}
                             </span>
                           </div>
-                          <Button
-                            className="w-full mt-4"
-                            onClick={() => onclick(bet)}
-                          >
-                            Claim Rewards
-                          </Button>
+                          {bet.status !== "Not Finish" && (
+                            <Button
+                              className="w-full mt-4"
+                              onClick={() => onclick(bet)}
+                            >
+                              Claim Rewards
+                            </Button>
+                          )}
                           {bet.status === "active" && (
                             <Button
                               className="w-full mt-4"
@@ -216,7 +218,7 @@ const MyBets = () => {
               <TabsContent value="active">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {bets
-                    .filter((bet) => bet.status === "active")
+                    .filter((bet) => bet.status === "Not Finish")
                     .map((bet) => (
                       <motion.div
                         key={bet.id}
@@ -228,7 +230,7 @@ const MyBets = () => {
                           <CardHeader className="flex flex-row items-center justify-between">
                             <div>
                               <h3 className="text-xl font-semibold">
-                                {bet.description}
+                                {bet.home} vs {bet.away}
                               </h3>
                               <p className="text-muted-foreground capitalize">
                                 {bet.gameType}
@@ -246,10 +248,6 @@ const MyBets = () => {
                               <span className={getStatusColor(bet.status)}>
                                 {bet.status?.toUpperCase()}
                               </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span>Date:</span>
-                              <span>{bet.timestamp}</span>
                             </div>
                             {bet.status === "active" && (
                               <Button
@@ -270,7 +268,7 @@ const MyBets = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {bets
                     .filter(
-                      (bet) => bet.status === "won" || bet.status === "lost",
+                      (bet) => bet.status === "Finished",
                     )
                     .map((bet) => (
                       <motion.div
@@ -283,7 +281,7 @@ const MyBets = () => {
                           <CardHeader className="flex flex-row items-center justify-between">
                             <div>
                               <h3 className="text-xl font-semibold">
-                                {bet.description}
+                                {bet.home} vs {bet.away}
                               </h3>
                               <p className="text-muted-foreground capitalize">
                                 {bet.gameType}
@@ -302,6 +300,12 @@ const MyBets = () => {
                                 {bet.status?.toUpperCase()}
                               </span>
                             </div>
+                            <Button
+                              className="w-full mt-4"
+                              onClick={() => onclick(bet)}
+                            >
+                              Claim Rewards
+                            </Button>
                           </CardContent>
                         </Card>
                       </motion.div>
