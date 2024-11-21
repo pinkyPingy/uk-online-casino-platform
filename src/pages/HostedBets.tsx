@@ -101,13 +101,13 @@ const HostedBets = () => {
     };
 
     const onclick = async (value) => {
-      try {
-        console.log("Call with value", value)
-        const res = await smartContractService.bankerClaimReward(value.id)
-      } catch(error){
-        console.log(error)
+        try {
+            console.log("Call with value", value)
+            const res = await smartContractService.bankerClaimReward(value.id)
+        } catch (error) {
+            console.log(error)
+        }
     }
-  } 
 
     if (!isConnected) {
         return (
@@ -173,16 +173,15 @@ const HostedBets = () => {
                                                             {bet.status?.toUpperCase() || 'ACTIVE'}
                                                         </span>
                                                     </div>
-                                          <div className="flex justify-between items-center">
-                                                        <span>Date:</span>
-                                                        <span>{bet.timestamp}</span>
-                                                    </div>
-                                                    <Button
-                                                                className="w-full mt-4"
-                                          onClick={() => onclick(bet)}
-                                          >
-                                                                Claim Rewards
-                                                            </Button>
+                                                    {bet.status !== 'ACTIVE' && (
+                                                        <Button
+                                                            className="w-full mt-4"
+                                                            onClick={() => onclick(bet)}
+                                                        >
+                                                            Claim Rewards
+                                                        </Button>
+                                                    )}
+
                                                 </CardContent>
                                             </Card>
                                         </motion.div>
@@ -205,7 +204,9 @@ const HostedBets = () => {
                                                 <Card>
                                                     <CardHeader className="flex flex-row items-center justify-between">
                                                         <div>
-                                                            <h3 className="text-xl font-semibold">{bet.description}</h3>
+                                                            <h3 className="text-xl font-semibold">
+                                                                {bet.home} vs {bet.away}
+                                                            </h3>
                                                             <p className="text-muted-foreground capitalize">{bet.gameType}</p>
                                                         </div>
                                                         {getStatusIcon(bet.status)}
@@ -213,7 +214,7 @@ const HostedBets = () => {
                                                     <CardContent className="space-y-4">
                                                         <div className="flex justify-between items-center">
                                                             <span>Wager Amount:</span>
-                                                            <span>{bet.totalStake} ETH</span>
+                                                            <span>{Number(bet.totalStake) / Math.pow(10, 18)} ETH</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
                                                             <span>Status:</span>
@@ -243,7 +244,9 @@ const HostedBets = () => {
                                                 <Card>
                                                     <CardHeader className="flex flex-row items-center justify-between">
                                                         <div>
-                                                            <h3 className="text-xl font-semibold">{bet.description}</h3>
+                                                            <h3 className="text-xl font-semibold">
+                                                                {bet.home} vs {bet.away}
+                                                            </h3>
                                                             <p className="text-muted-foreground capitalize">{bet.gameType}</p>
                                                         </div>
                                                         {getStatusIcon(bet.status)}
@@ -251,7 +254,7 @@ const HostedBets = () => {
                                                     <CardContent className="space-y-4">
                                                         <div className="flex justify-between items-center">
                                                             <span>Wager Amount:</span>
-                                                            <span>{bet.totalStake} ETH</span>
+                                                            <span>{Number(bet.totalStake) / Math.pow(10, 18)} ETH</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
                                                             <span>Status:</span>
