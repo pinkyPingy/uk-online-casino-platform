@@ -100,6 +100,15 @@ const HostedBets = () => {
         }
     };
 
+    const onclick = async (value) => {
+      try {
+        console.log("Call with value", value)
+        const res = await smartContractService.bankerClaimReward(value.id)
+      } catch(error){
+        console.log(error)
+    }
+  } 
+
     if (!isConnected) {
         return (
             <div className="min-h-screen bg-background">
@@ -164,6 +173,16 @@ const HostedBets = () => {
                                                             {bet.status?.toUpperCase() || 'ACTIVE'}
                                                         </span>
                                                     </div>
+                                          <div className="flex justify-between items-center">
+                                                        <span>Date:</span>
+                                                        <span>{bet.timestamp}</span>
+                                                    </div>
+                                                    <Button
+                                                                className="w-full mt-4"
+                                          onClick={() => onclick(bet)}
+                                          >
+                                                                Claim Rewards
+                                                            </Button>
                                                 </CardContent>
                                             </Card>
                                         </motion.div>
